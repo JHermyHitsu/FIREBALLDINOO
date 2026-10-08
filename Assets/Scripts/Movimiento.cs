@@ -22,6 +22,11 @@ public class Movimiento : MonoBehaviour
     private float coyoteCounter;
     private float jumpBufferCounter;
     private bool saltoMantenido;
+    private bool vivo = true;
+    private Vector3 posicionInicial;
+
+
+
 
     void Start()
     {
@@ -29,10 +34,12 @@ public class Movimiento : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         if (animator == null)
             animator = GetComponent<Animator>();
+        posicionInicial = transform.position;
     }
 
     void Update()
     {
+        if (!vivo) return;
         entradaX = Input.GetAxisRaw("Horizontal");
         if (entradaX > 0) spriteRenderer.flipX = false;
         else if (entradaX < 0) spriteRenderer.flipX = true;
@@ -58,6 +65,7 @@ public class Movimiento : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (!vivo) return;
         rb.linearVelocity = new Vector2(entradaX * velocidad, rb.linearVelocity.y);
 
         if (jumpBufferCounter > 0f && coyoteCounter > 0f)
@@ -97,5 +105,31 @@ public class Movimiento : MonoBehaviour
         foreach (var c in col.contacts)
             if (c.normal.y > 0.5f) return true;
         return false;
+    }
+    public void Morir()
+    {
+        if (!vivo) return;
+        vivo = false;
+         if (animator != null)
+        {
+            animator.SetBool("Muerto", true);
+            animator.SetTrigger("Morir");
+        }
+        rb.linearVelocity = new Vector2(0f, 12f);
+        foreach (Collider2D c in GameObject.FindGameObjectWithTag("SUELO").GetComponents<Collider2D>())
+            Physics2D.IgnoreCollision(GetComponent<Collider2D>(), c, true);
+        Invoke(nameof(Respawnear), 2f);
+    }
+
+    private void Respawnear()
+    {
+        foreach (Collider2D c in GameObject.FindGameObjectWithTag("SUELO").GetComponents<Collider2D>())
+            Physics2D.IgnoreCollision(GetComponent<Collider2D>(), c, false);
+        transform.position = posicionInicial;
+        rb.linearVelocity = Vector2.zero;
+        estaEnSuelo = false;
+        if (animator != null)
+            animator.SetBool("Muerto", false);
+        vivo = true;
     }
 }
