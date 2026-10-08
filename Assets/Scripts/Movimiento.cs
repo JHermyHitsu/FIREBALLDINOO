@@ -16,6 +16,7 @@ public class Movimiento : MonoBehaviour
     public Animator animator;
 
     private Rigidbody2D rb;
+    private Collider2D colDino;
     private SpriteRenderer spriteRenderer;
     private float entradaX;
     private bool estaEnSuelo;
@@ -25,12 +26,10 @@ public class Movimiento : MonoBehaviour
     private bool vivo = true;
     private Vector3 posicionInicial;
 
-
-
-
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        colDino = GetComponent<Collider2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         if (animator == null)
             animator = GetComponent<Animator>();
@@ -110,21 +109,24 @@ public class Movimiento : MonoBehaviour
     {
         if (!vivo) return;
         vivo = false;
-         if (animator != null)
+        if (animator != null)
         {
             animator.SetBool("Muerto", true);
             animator.SetTrigger("Morir");
         }
         rb.linearVelocity = new Vector2(0f, 12f);
-        foreach (Collider2D c in GameObject.FindGameObjectWithTag("SUELO").GetComponents<Collider2D>())
-            Physics2D.IgnoreCollision(GetComponent<Collider2D>(), c, true);
+        // Ignora TODOS los objetos SUELO (suelo + techo), no solo el primero
+        foreach (GameObject suelo in GameObject.FindGameObjectsWithTag("SUELO"))
+            foreach (Collider2D c in suelo.GetComponents<Collider2D>())
+                Physics2D.IgnoreCollision(colDino, c, true);
         Invoke(nameof(Respawnear), 2f);
     }
 
     private void Respawnear()
     {
-        foreach (Collider2D c in GameObject.FindGameObjectWithTag("SUELO").GetComponents<Collider2D>())
-            Physics2D.IgnoreCollision(GetComponent<Collider2D>(), c, false);
+        foreach (GameObject suelo in GameObject.FindGameObjectsWithTag("SUELO"))
+            foreach (Collider2D c in suelo.GetComponents<Collider2D>())
+                Physics2D.IgnoreCollision(colDino, c, false);
         transform.position = posicionInicial;
         rb.linearVelocity = Vector2.zero;
         estaEnSuelo = false;

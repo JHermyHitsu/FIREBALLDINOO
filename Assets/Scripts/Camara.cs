@@ -11,8 +11,8 @@ public class Camara : MonoBehaviour
     {
         if (personaje == null) return;
 
-        // Solo avanza, nunca retrocede como Mario
-        float targetX = Mathf.Max(transform.position.x, personaje.position.x + adelantoX);
+        // Sigue al personaje en ambas direcciones
+        float targetX = personaje.position.x + adelantoX;
 
         Vector3 deseada = new Vector3(targetX, yFija, -10f);
         transform.position = Vector3.Lerp(transform.position, deseada, smoothSpeed * Time.deltaTime);
