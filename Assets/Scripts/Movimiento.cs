@@ -14,8 +14,11 @@ public class Movimiento : MonoBehaviour
     public float maxFallSpeed = -18f;
     [Header("Animación")]
     public Animator animator;
+    [Header("Sonidos")]
+    public AudioClip sonidoMuerte;
 
     private Rigidbody2D rb;
+    private AudioSource sfx;
     private Collider2D colDino;
     private SpriteRenderer spriteRenderer;
     private float entradaX;
@@ -29,6 +32,7 @@ public class Movimiento : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        sfx = GetComponent<AudioSource>();
         colDino = GetComponent<Collider2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         if (animator == null)
@@ -109,6 +113,8 @@ public class Movimiento : MonoBehaviour
     {
         if (!vivo) return;
         vivo = false;
+        if (sfx != null && sonidoMuerte != null)
+            sfx.PlayOneShot(sonidoMuerte);
         if (animator != null)
         {
             animator.SetBool("Muerto", true);
