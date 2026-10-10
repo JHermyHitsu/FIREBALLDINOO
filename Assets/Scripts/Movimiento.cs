@@ -27,6 +27,8 @@ public class Movimiento : MonoBehaviour
     private float jumpBufferCounter;
     private bool saltoMantenido;
     private bool vivo = true;
+    private float boostMult = 1f;
+    private float boostTiempo = 0f;
     private Vector3 posicionInicial;
 
     void Start()
@@ -59,6 +61,13 @@ public class Movimiento : MonoBehaviour
 
         saltoMantenido = Input.GetKey(KeyCode.Space);
 
+        if (boostTiempo > 0f)
+        {
+            boostTiempo -= Time.deltaTime;
+            if (boostTiempo <= 0f)
+                boostMult = 1f;
+        }
+
         if (animator != null)
         {
             animator.SetFloat("Velocidad", Mathf.Abs(entradaX));
@@ -69,7 +78,7 @@ public class Movimiento : MonoBehaviour
     void FixedUpdate()
     {
         if (!vivo) return;
-        rb.linearVelocity = new Vector2(entradaX * velocidad, rb.linearVelocity.y);
+        rb.linearVelocity = new Vector2(entradaX * velocidad * boostMult, rb.linearVelocity.y);
 
         if (jumpBufferCounter > 0f && coyoteCounter > 0f)
         {
@@ -108,6 +117,12 @@ public class Movimiento : MonoBehaviour
         foreach (var c in col.contacts)
             if (c.normal.y > 0.5f) return true;
         return false;
+    }
+    public void ActivarBoost(float mult, float duracion)
+    {
+        if (!vivo) return;
+        boostMult = mult;
+        boostTiempo = duracion;
     }
     public void Morir()
     {
