@@ -2,19 +2,26 @@ using UnityEngine;
 
 public class Camara : MonoBehaviour
 {
+    [Header("Objetivo a seguir")]
     public Transform personaje;
-    public float smoothSpeed = 5f;
-    public float adelantoX = 2f; // ver hacia adelante
-    public float yFija = 2.68f;  // la Y que ya tenés en tu captura, clavala
 
+    [Header("Configuración de seguimiento")]
+    public float smoothSpeed = 5f;  // Suavidad del movimiento
+    public float adelantoX = 2f;    // Distancia que la cámara mira hacia adelante
+    public float yFija = 2.68f;     // Altura fija de la cámara para no marear al saltar
+
+    // LateUpdate se ejecuta después de que el personaje se mueve, evitando tirones visuales
     void LateUpdate()
     {
         if (personaje == null) return;
 
-        // Sigue al personaje en ambas direcciones
+        // Calculamos la posición horizontal deseada (adelantada un poco para ver obstáculos)
         float targetX = personaje.position.x + adelantoX;
 
-        Vector3 deseada = new Vector3(targetX, yFija, -10f);
-        transform.position = Vector3.Lerp(transform.position, deseada, smoothSpeed * Time.deltaTime);
+        // Mantenemos la altura Y fija y Z en -10 (estándar para cámaras 2D)
+        Vector3 posicionDeseada = new Vector3(targetX, yFija, -10f);
+
+        // Interpolamos suavemente hacia la posición deseada
+        transform.position = Vector3.Lerp(transform.position, posicionDeseada, smoothSpeed * Time.deltaTime);
     }
 }
