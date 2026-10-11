@@ -7612,6 +7612,7 @@ MonoBehaviour:
   lowJumpMultiplier: 2
   maxFallSpeed: -18
   animator: {fileID: 0}
+  sonidoSalto: {fileID: 8300000, guid: a847d5c80e42e119495e428b872a2d6c, type: 3}
   sonidoMuerte: {fileID: 8300000, guid: ad48f6502af01f21dafa058c0d4b0179, type: 3}
 --- !u!70 &1673381454
 CapsuleCollider2D:
@@ -7764,7 +7765,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.8
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 0
   Mute: 0
