@@ -6,10 +6,10 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Desierto.unity
+    path: Assets/Scenes/ESCENA_BIOMA_DESIERTO.unity
     guid: 915cf32d3020c194092ceb872ea4f19b
   - enabled: 1
-    path: Assets/Recursos/ESCENAS/ESCENA_BIOMA_BOSQUE.unity
+    path: Assets/Scenes/ESCENA_BIOMA_BOSQUE.unity
     guid: 600445a2575b8e965bca99379598a65e
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
