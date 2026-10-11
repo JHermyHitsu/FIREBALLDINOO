@@ -107,6 +107,27 @@ public class DinoSeguidor : MonoBehaviour
     public void Sacrificar()
     {
         reclutado = false;
-        Destroy(gameObject);
+
+        // 1. Desactivar collider para que atraviese el suelo al caer (igual que el verde)
+        if (col != null)
+            col.enabled = false;
+
+        // 2. Darle gravedad y salto de muerte (idéntico al dino verde)
+        if (rb == null)
+            rb = gameObject.AddComponent<Rigidbody2D>();
+
+        rb.bodyType = RigidbodyType2D.Dynamic;
+        rb.gravityScale = 2f;
+        rb.linearVelocity = new Vector2(0f, 10f);
+
+        // 3. Activar animación de muerte en el Animator
+        if (animator != null)
+        {
+            animator.SetBool("Muerto", true);
+            animator.SetTrigger("Morir");
+        }
+
+        // 4. Destruir tras caer fuera de la pantalla
+        Destroy(gameObject, 1.5f);
     }
 }
