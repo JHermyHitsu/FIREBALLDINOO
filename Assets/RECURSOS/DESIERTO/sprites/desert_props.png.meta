@@ -69,14 +69,12 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 32
+  spritePixelsToUnits: 10
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
-  spriteTessellationMethod: 0
   spriteTessellationDetail: -1
-  spriteGeometrySubdivision: -1
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
@@ -146,10 +144,10 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 1bb9de24587e3d320800000000000000
-      internalID: 2581661570952960945
+      spriteID: f98579f7f4583c64084807c3992c544d
+      internalID: 1930004517
       vertices: []
       indices: 
       edges: []
@@ -168,10 +166,10 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 160354edf202b2070800000000000000
-      internalID: 8082589346211115105
+      spriteID: a547c3c3e0b53e84f92a6482252839ff
+      internalID: 1476951813
       vertices: []
       indices: 
       edges: []
@@ -190,10 +188,10 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: ec7548ce2290075f0800000000000000
-      internalID: -761098291423979570
+      spriteID: 188b7734911546748b7deea72721e32a
+      internalID: -51863298
       vertices: []
       indices: 
       edges: []
@@ -212,10 +210,10 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: b2dd4364ece68fad0800000000000000
-      internalID: -2668260946996830933
+      spriteID: ea89a44b22a62fb488bc42112d73118d
+      internalID: 1439349806
       vertices: []
       indices: 
       edges: []
@@ -234,10 +232,10 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: f8870c65ad8af2020800000000000000
-      internalID: 2319257988830886031
+      spriteID: 403a1b778b7b41c4fa524c40efe5c505
+      internalID: -1078774423
       vertices: []
       indices: 
       edges: []
@@ -256,10 +254,10 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: f9382a99e272308d0800000000000000
-      internalID: -2881416255487442017
+      spriteID: 2cb4fe876cd3e49459101fbbd4855eb6
+      internalID: -1686601112
       vertices: []
       indices: 
       edges: []
@@ -278,10 +276,10 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 67814a92dbd2ecc40800000000000000
-      internalID: 5534411282555607158
+      spriteID: d2bf8b54ff82f2c4887f98bc14264ea6
+      internalID: -2142729729
       vertices: []
       indices: 
       edges: []
@@ -302,13 +300,13 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      desert_props_0: 2581661570952960945
-      desert_props_1: 8082589346211115105
-      desert_props_2: -761098291423979570
-      desert_props_3: -2668260946996830933
-      desert_props_4: 2319257988830886031
-      desert_props_5: -2881416255487442017
-      desert_props_6: 5534411282555607158
+      desert_props_0: 1930004517
+      desert_props_1: 1476951813
+      desert_props_2: -51863298
+      desert_props_3: 1439349806
+      desert_props_4: -1078774423
+      desert_props_5: -1686601112
+      desert_props_6: -2142729729
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
