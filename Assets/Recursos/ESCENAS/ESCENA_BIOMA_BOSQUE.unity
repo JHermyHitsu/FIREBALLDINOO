@@ -273,6 +273,75 @@ MonoBehaviour:
   smoothSpeed: 5
   adelantoX: 2
   yFija: 2.68
+--- !u!1001 &511516123
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3088174688232166874, guid: 55c3ab2b4517529bb98bd6f8ae42df83, type: 3}
+      propertyPath: m_Size.y
+      value: 0.16101405
+      objectReference: {fileID: 0}
+    - target: {fileID: 3088174688232166874, guid: 55c3ab2b4517529bb98bd6f8ae42df83, type: 3}
+      propertyPath: m_Offset.y
+      value: 0.103288285
+      objectReference: {fileID: 0}
+    - target: {fileID: 3419324360772659660, guid: 55c3ab2b4517529bb98bd6f8ae42df83, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 10.62
+      objectReference: {fileID: 0}
+    - target: {fileID: 3419324360772659660, guid: 55c3ab2b4517529bb98bd6f8ae42df83, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -2.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3419324360772659660, guid: 55c3ab2b4517529bb98bd6f8ae42df83, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3419324360772659660, guid: 55c3ab2b4517529bb98bd6f8ae42df83, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3419324360772659660, guid: 55c3ab2b4517529bb98bd6f8ae42df83, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3419324360772659660, guid: 55c3ab2b4517529bb98bd6f8ae42df83, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3419324360772659660, guid: 55c3ab2b4517529bb98bd6f8ae42df83, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3419324360772659660, guid: 55c3ab2b4517529bb98bd6f8ae42df83, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3419324360772659660, guid: 55c3ab2b4517529bb98bd6f8ae42df83, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3419324360772659660, guid: 55c3ab2b4517529bb98bd6f8ae42df83, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4260903305488860864, guid: 55c3ab2b4517529bb98bd6f8ae42df83, type: 3}
+      propertyPath: offsetVertical
+      value: -0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9112554365290563677, guid: 55c3ab2b4517529bb98bd6f8ae42df83, type: 3}
+      propertyPath: m_Name
+      value: Amigo_dino_azul
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 55c3ab2b4517529bb98bd6f8ae42df83, type: 3}
 --- !u!1 &583052600
 GameObject:
   m_ObjectHideFlags: 0
@@ -7606,14 +7675,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Movimiento
   velocidad: 10
   fuerzaSalto: 14
-  coyoteTime: 0.1
-  jumpBufferTime: 0.15
-  fallMultiplier: 2.5
-  lowJumpMultiplier: 2
-  maxFallSpeed: -18
   animator: {fileID: 0}
   sonidoSalto: {fileID: 8300000, guid: a847d5c80e42e119495e428b872a2d6c, type: 3}
   sonidoMuerte: {fileID: 8300000, guid: ad48f6502af01f21dafa058c0d4b0179, type: 3}
+  maxSeguidores: 4
+  seguidores: []
 --- !u!70 &1673381454
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -22834,3 +22900,4 @@ SceneRoots:
   - {fileID: 807228852}
   - {fileID: 985593153}
   - {fileID: 2006538992912798050}
+  - {fileID: 511516123}
