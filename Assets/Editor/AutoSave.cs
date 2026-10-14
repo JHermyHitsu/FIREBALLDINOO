@@ -13,9 +13,9 @@ using UnityEngine.SceneManagement;
 public static class AutoSave
 {
     // ── Configuración ──────────────────────────────────────────
-    private const bool SAVE_ON_CHANGE    = true;   // Guarda al detectar cambios (como VSCode)
-    private const bool SAVE_ON_PLAY      = true;   // Guarda al presionar Play
-    private const bool SHOW_LOG          = true;   // Muestra mensaje en Console
+    private static bool SAVE_ON_CHANGE    = true;   // Guarda al detectar cambios (como VSCode)
+    private static bool SAVE_ON_PLAY      = true;   // Guarda al presionar Play
+    private static bool SHOW_LOG          = true;   // Muestra mensaje en Console
     // ──────────────────────────────────────────────────────────
 
     static AutoSave()

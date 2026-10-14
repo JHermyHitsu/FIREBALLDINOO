@@ -3316,6 +3316,7 @@ GameObject:
   - component: {fileID: 408929472}
   - component: {fileID: 408929471}
   - component: {fileID: 408929474}
+  - component: {fileID: 408929475}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -3441,6 +3442,22 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &408929475
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 408929470}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 852069f84f39a54ca9768996130cbc93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Camara
+  personaje: {fileID: 0}
+  smoothSpeed: 5
+  adelantoX: 2
+  yFija: 0
 --- !u!1 &418326623
 GameObject:
   m_ObjectHideFlags: 0
@@ -14139,6 +14156,37 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &1866165355
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1866165356}
+  m_Layer: 0
+  m_Name: spawn_from_desierto
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1866165356
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1866165355}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 10.05, y: 6.08, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1903329005
 GameObject:
   m_ObjectHideFlags: 0
@@ -14245,8 +14293,8 @@ GameObject:
   - component: {fileID: 1904398047}
   - component: {fileID: 1904398046}
   m_Layer: 0
-  m_Name: Piso
-  m_TagString: Untagged
+  m_Name: Tilemap_cueva_suelo
+  m_TagString: SUELO
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -31227,8 +31275,8 @@ Transform:
   m_GameObject: {fileID: 2056307305}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.58971, y: 0.00415, z: 0}
-  m_LocalScale: {x: 1.5343121, y: 1.0243713, z: 1}
+  m_LocalPosition: {x: 3.635, y: -0.016, z: 0}
+  m_LocalScale: {x: 1.4501244, y: 0.9838482, z: 0.94513}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 710526917}
@@ -32353,3 +32401,4 @@ SceneRoots:
   - {fileID: 1522664194}
   - {fileID: 1006511319}
   - {fileID: 649432071}
+  - {fileID: 1866165356}
