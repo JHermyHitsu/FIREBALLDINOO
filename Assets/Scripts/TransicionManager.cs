@@ -18,7 +18,7 @@ public class TransicionManager : MonoBehaviour
 
     [Header("Fila")]
     [Tooltip("Cuántos metros detrás del jugador aparecen los seguidores al llegar.")]
-    public float separacionFila = 1.4f;
+    public float separacionFila = 1.1f;
 
     public bool EnTransicion { get; private set; }
 
@@ -168,6 +168,12 @@ public class TransicionManager : MonoBehaviour
         if (rb != null) rb.linearVelocity = Vector2.zero;
         if (sr != null) sr.flipX = false;
 
+        // Limpiar y re-vincular la lista de seguidores del jugador
+        if (mov != null)
+        {
+            mov.seguidores.Clear();
+        }
+
         for (int i = filaViajera.Count - 1; i >= 0; i--)
         {
             DinoSeguidor s = filaViajera[i];
@@ -180,6 +186,24 @@ public class TransicionManager : MonoBehaviour
             Rigidbody2D rbF = s.GetComponent<Rigidbody2D>();
             if (rbF != null) rbF.linearVelocity = Vector2.zero;
         }
+
+        // Re-vincular los seguidores al jugador para que la fila e índices sean correctos
+        if (mov != null)
+        {
+            for (int i = 0; i < filaViajera.Count; i++)
+            {
+                DinoSeguidor s = filaViajera[i];
+                if (s != null)
+                {
+                    s.ReVincular(mov);
+                    s.AsignarIndice(i);
+                    mov.seguidores.Add(s);
+                }
+            }
+        }
+
+        // Limpiar historial de posiciones para que arranquen desde el spawn
+        DinoSeguidor.LimpiarHistorial();
 
         // 6. Re-linkear la cámara de la escena nueva y teleportarla (evita el barrido largo).
         Camara cam = FindFirstObjectByType<Camara>();
