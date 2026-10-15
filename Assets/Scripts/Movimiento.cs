@@ -136,7 +136,14 @@ public class Movimiento : MonoBehaviour
         rb.linearVelocity = new Vector2(0f, 10f);
         if (col != null) col.enabled = false;
 
-        Invoke(nameof(ReiniciarNivel), 2f);
+        Invoke(nameof(MostrarBotonMuerte), 1.5f);
+    }
+
+    void MostrarBotonMuerte()
+    {
+        var temp = FindFirstObjectByType<Temporizador>();
+        if (temp != null) temp.MostrarGameOver("TE CAISTE");
+        else ReiniciarNivel();
     }
 
     private void ReiniciarNivel()

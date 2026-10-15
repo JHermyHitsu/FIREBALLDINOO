@@ -264,7 +264,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.103773594, g: 0.0073424703, b: 0.0073424703, a: 0.392}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.392}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -475,6 +475,7 @@ MonoBehaviour:
   tiempoRestante: 0
   textoTiempo: {fileID: 1037321432}
   panelGameOver: {fileID: 58371157}
+  textoMensaje: {fileID: 251718962}
 --- !u!1 &405737153
 GameObject:
   m_ObjectHideFlags: 0

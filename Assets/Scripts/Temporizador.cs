@@ -9,6 +9,7 @@ public class Temporizador : MonoBehaviour
     public float tiempoRestante;
     public TextMeshProUGUI textoTiempo;
     public GameObject panelGameOver; // arrastra PanelGameOver aquí
+    public TextMeshProUGUI textoMensaje; // arrastra Texto_TiempoAgotado aquí
     bool terminado = false;
 
     void Awake()
@@ -36,12 +37,13 @@ public class Temporizador : MonoBehaviour
             MostrarGameOver();
         }
     }
-    void MostrarGameOver()
+    public void MostrarGameOver(string mensaje = "TIEMPO AGOTADO")
     {
         terminado = true;
         var mov = FindFirstObjectByType<Movimiento>();
         if (mov != null) mov.enabled = false; // frena al dino, ya no es Morir()
         if (textoTiempo != null) textoTiempo.gameObject.SetActive(false);
+        if (textoMensaje != null) textoMensaje.text = mensaje;
         if (panelGameOver != null) panelGameOver.SetActive(true);
     }
     public void AgregarTiempo(float seg) { if(!terminado) tiempoRestante += seg; }
