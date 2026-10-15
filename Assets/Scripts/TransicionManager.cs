@@ -18,7 +18,7 @@ public class TransicionManager : MonoBehaviour
 
     [Header("Fila")]
     [Tooltip("Cuántos metros detrás del jugador aparecen los seguidores al llegar.")]
-    public float separacionFila = 1.1f;
+    public float separacionFila = 0.7f;
 
     public bool EnTransicion { get; private set; }
 

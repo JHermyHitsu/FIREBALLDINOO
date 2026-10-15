@@ -4,8 +4,8 @@ using System.Collections.Generic;
 public class DinoSeguidor : MonoBehaviour
 {
     [Header("Ajustes")]
-    public float distanciaDetras = 1.1f;
-    public float suavizadoHorizontal = 10f;
+    public float distanciaDetras = 0.7f;
+    public float suavizadoHorizontal = 14f;
     public float offsetVertical = 0f;
 
     [Header("Estado")]
@@ -30,7 +30,7 @@ public class DinoSeguidor : MonoBehaviour
 
     // Cuántos registros de separación hay entre cada seguidor en la fila
     [Header("Separación en fila")]
-    public int pasosSeparacion = 8;
+    public int pasosSeparacion = 3;
 
     void Awake()
     {
@@ -123,16 +123,20 @@ public class DinoSeguidor : MonoBehaviour
 
         Vector3 posObjetivo = historialPosiciones[indiceHistorial];
 
-        // ── Distancia mínima de seguridad ──
-        // Si la posición del historial queda demasiado cerca del líder
-        // (ej: el jugador está quieto), forzar posición detrás.
+        // ── Separación compacta estilo horda (Zombie Tsunami) ──
         float distMin = distanciaDetras * (indiceFila + 1);
-        float distAlLider = Mathf.Abs(posObjetivo.x - lider.transform.position.x);
-        if (distAlLider < distMin * 0.5f)
+        bool miraIzq = srLider.flipX;
+        float dirDetras = miraIzq ? 1f : -1f;
+        float xMinima = lider.transform.position.x + (dirDetras * distMin);
+
+        // Asegurar que el seguidor se mantenga pegado detrás del líder sin adelantarse ni alejarse de más
+        if (!miraIzq)
         {
-            bool miraIzq = srLider.flipX;
-            float dirDetras = miraIzq ? 1f : -1f;
-            posObjetivo.x = lider.transform.position.x + (dirDetras * distMin);
+            if (posObjetivo.x > xMinima) posObjetivo.x = xMinima;
+        }
+        else
+        {
+            if (posObjetivo.x < xMinima) posObjetivo.x = xMinima;
         }
 
         // ── Aplicar posición suavizada ──

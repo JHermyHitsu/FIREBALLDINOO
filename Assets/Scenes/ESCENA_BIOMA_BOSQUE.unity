@@ -207,7 +207,7 @@ Transform:
   m_GameObject: {fileID: 3008728}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 659.2, y: 8.07, z: 0}
+  m_LocalPosition: {x: 45.7, y: 13, z: 0}
   m_LocalScale: {x: 1.073, y: 1.11676, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -531,7 +531,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa2a752280a2a945db33373a0ae62eda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Temporizador
-  tiempoInicial: 10
+  tiempoInicial: 60
   tiempoRestante: 0
   textoTiempo: {fileID: 1037321432}
   panelGameOver: {fileID: 58371157}
@@ -8792,11 +8792,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f2bb92b29fce6fdabb4cb5093e63ec6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DinoSeguidor
-  distanciaDetras: 1.4
-  suavizadoHorizontal: 12
+  distanciaDetras: 0.7
+  suavizadoHorizontal: 14
   offsetVertical: -0.1
   reclutado: 0
-  pasosSeparacion: 18
+  pasosSeparacion: 3
 --- !u!95 &1416016785
 Animator:
   serializedVersion: 7
