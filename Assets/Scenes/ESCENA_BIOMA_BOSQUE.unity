@@ -374,6 +374,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 816422342947501148, guid: 55c3ab2b4517529bb98bd6f8ae42df83, type: 3}
+      propertyPath: m_SortingOrder
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 3088174688232166874, guid: 55c3ab2b4517529bb98bd6f8ae42df83, type: 3}
       propertyPath: m_Size.y
       value: 0.16101405
@@ -22991,6 +22995,10 @@ PrefabInstance:
       propertyPath: m_UsedByEffector
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3109306753281098503, guid: ad76ce76d469f9ff58bc827d974acaf8, type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 5995159309519085762, guid: ad76ce76d469f9ff58bc827d974acaf8, type: 3}
       propertyPath: m_LocalScale.x
       value: 13
@@ -23058,6 +23066,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3905091796417344661, guid: f18555cd9d376d35c99a4a48b03774d6, type: 3}
+      propertyPath: m_SortingOrder
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4374153295767282325, guid: f18555cd9d376d35c99a4a48b03774d6, type: 3}
       propertyPath: m_Name
       value: Dino_Jugador

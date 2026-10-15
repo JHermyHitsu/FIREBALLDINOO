@@ -1,13 +1,10 @@
 fileFormatVersion: 2
-guid: f7247800267b7df5da4434697ce5df27
+guid: 7694db057f2481d909527707032dbcab
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8828595927275777479
-    second: 02 bg2_0
-  - first:
-      213: -5398504820006895922
-    second: 02 bg2_1
+      213: 8741655638383978464
+    second: 01 bg_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -40,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -59,9 +56,7 @@ TextureImporter:
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
-  spriteTessellationMethod: 0
   spriteTessellationDetail: -1
-  spriteGeometrySubdivision: -1
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
@@ -118,35 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 02 bg2_0
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 90
-        width: 128
-        height: 70
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 9325441b7c68a7580800000000000000
-      internalID: -8828595927275777479
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 02 bg2_1
+      name: 01 bg_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 128
-        height: 84
+        height: 160
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -155,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ece314df778a415b0800000000000000
-      internalID: -5398504820006895922
+      spriteID: 0e7eaa2ec79905970800000000000000
+      internalID: 8741655638383978464
       vertices: []
       indices: 
       edges: []
@@ -175,8 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      02 bg2_0: -8828595927275777479
-      02 bg2_1: -5398504820006895922
+      01 bg_0: 8741655638383978464
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
