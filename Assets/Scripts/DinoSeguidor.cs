@@ -32,6 +32,13 @@ public class DinoSeguidor : MonoBehaviour
     [Header("Separación en fila")]
     public int pasosSeparacion = 3;
 
+    [Header("Caída al vacío")]
+    public float distanciaRayoSuelo = 1.0f;
+    public float tiempoLimiteSinSuelo = 0.25f;
+
+    private bool cayendo = false;
+    private float tiempoSinSuelo = 0f;
+
     void Awake()
     {
         col = GetComponent<Collider2D>();
@@ -51,7 +58,7 @@ public class DinoSeguidor : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D otro)
     {
-        if (reclutado) return;
+        if (reclutado || cayendo) return;
         if (otro.CompareTag("Player"))
         {
             Movimiento jugador = otro.GetComponent<Movimiento>();
@@ -62,9 +69,11 @@ public class DinoSeguidor : MonoBehaviour
 
     public void Reclutar(Movimiento jugador)
     {
+        if (cayendo) return;
         reclutado = true;
         lider = jugador;
         srLider = lider.GetComponent<SpriteRenderer>();
+        tiempoSinSuelo = 0f;
 
         if (col != null) col.enabled = false;
         if (rb != null)
@@ -84,15 +93,54 @@ public class DinoSeguidor : MonoBehaviour
     /// </summary>
     public void ReVincular(Movimiento jugador)
     {
+        if (cayendo) return;
         lider = jugador;
         srLider = lider.GetComponent<SpriteRenderer>();
+        tiempoSinSuelo = 0f;
     }
 
     public void AsignarIndice(int indice) => indiceFila = indice;
 
     void Update()
     {
+        if (cayendo)
+        {
+            if (transform.position.y < -12f)
+                Destroy(gameObject);
+            return;
+        }
+
         if (!reclutado || lider == null) return;
+
+        // ── Comprobar si está en el aire mientras el líder está en suelo firme ──
+        if (lider.EstaEnSuelo())
+        {
+            if (!TieneSueloDebajo())
+            {
+                tiempoSinSuelo += Time.deltaTime;
+                if (tiempoSinSuelo >= tiempoLimiteSinSuelo)
+                {
+                    CaerYMorir();
+                    return;
+                }
+            }
+            else
+            {
+                tiempoSinSuelo = 0f;
+            }
+        }
+        else
+        {
+            // Mientras el líder salta, no cuenta como caída
+            tiempoSinSuelo = 0f;
+        }
+
+        // Red de seguridad si cae por debajo del nivel
+        if (transform.position.y < -12f)
+        {
+            CaerYMorir();
+            return;
+        }
 
         // Si el líder cambió (ej: transición de escena), reiniciar el historial
         if (ultimoLiderRegistrado != lider.transform)
@@ -114,7 +162,7 @@ public class DinoSeguidor : MonoBehaviour
 
     void LateUpdate()
     {
-        if (!reclutado || lider == null) return;
+        if (cayendo || !reclutado || lider == null) return;
         if (historialPosiciones.Count == 0) return;
 
         // ── Leer la posición pasada correspondiente a este seguidor ──
@@ -156,6 +204,84 @@ public class DinoSeguidor : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Comprueba si hay una plataforma sólida debajo de los pies del dino.
+    /// </summary>
+    public bool TieneSueloDebajo()
+    {
+        Vector2 origenCentro = (Vector2)transform.position + Vector2.up * 0.3f;
+
+        // Revisar el centro y un punto ligeramente hacia adelante
+        float dirFrente = (sr != null && sr.flipX) ? -0.25f : 0.25f;
+        Vector2 origenFrente = origenCentro + new Vector2(dirFrente, 0f);
+
+        return HaySueloEn(origenCentro) || HaySueloEn(origenFrente);
+    }
+
+    private bool HaySueloEn(Vector2 origen)
+    {
+        RaycastHit2D[] hits = Physics2D.RaycastAll(origen, Vector2.down, distanciaRayoSuelo);
+        foreach (var hit in hits)
+        {
+            if (hit.collider == null || hit.collider.isTrigger) continue;
+            if (hit.collider.gameObject == gameObject) continue;
+            if (hit.collider.CompareTag("Player")) continue;
+
+            // Cualquier collider sólido con tag "SUELO" o capa de suelo
+            if (hit.collider.CompareTag("SUELO") || hit.collider.gameObject.layer == LayerMask.NameToLayer("SUELO"))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Llamado cuando el dino no tiene plataforma debajo y debe caer al precipicio y morir.
+    /// </summary>
+    public void CaerYMorir()
+    {
+        if (cayendo) return;
+        cayendo = true;
+        reclutado = false;
+
+        // 1. Desvincular del líder y sacarlo de la lista de vidas extra
+        if (lider != null)
+        {
+            if (lider.sonidoMuerte != null)
+            {
+                Vector3 posAudio = Camera.main != null ? Camera.main.transform.position : transform.position;
+                AudioSource.PlayClipAtPoint(lider.sonidoMuerte, posAudio);
+            }
+            lider.RemoverSeguidor(this);
+            lider = null;
+        }
+
+        // 2. Desactivar collider para que caiga libremente por el precipicio
+        if (col != null)
+            col.enabled = false;
+
+        // 3. Activar física dinámica y gravedad para la caída
+        if (rb == null)
+            rb = gameObject.AddComponent<Rigidbody2D>();
+
+        rb.bodyType = RigidbodyType2D.Dynamic;
+        rb.gravityScale = 3f;
+        rb.linearVelocity = new Vector2(0f, -2.5f);
+
+        // 4. Animación de muerte/caída
+        if (animator != null)
+        {
+            animator.SetBool("EnSuelo", false);
+            animator.SetFloat("Velocidad", 0f);
+            animator.SetBool("Muerto", true);
+            animator.SetTrigger("Morir");
+        }
+
+        // 5. Destruir tras caer
+        Destroy(gameObject, 1.5f);
+    }
+
     // ── Utilidades estáticas ──
 
     /// <summary>
@@ -182,6 +308,8 @@ public class DinoSeguidor : MonoBehaviour
     // Llamado cuando el jugador recibe daño y este dino se sacrifica para salvarlo
     public void Sacrificar()
     {
+        if (cayendo) return;
+        cayendo = true;
         reclutado = false;
 
         // 1. Desactivar collider para que atraviese el suelo al caer (igual que el verde)

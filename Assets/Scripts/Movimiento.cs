@@ -99,6 +99,19 @@ public class Movimiento : MonoBehaviour
         return true;
     }
 
+    public void RemoverSeguidor(DinoSeguidor amigo)
+    {
+        if (seguidores.Contains(amigo))
+        {
+            seguidores.Remove(amigo);
+            for (int i = 0; i < seguidores.Count; i++)
+            {
+                if (seguidores[i] != null)
+                    seguidores[i].AsignarIndice(i);
+            }
+        }
+    }
+
     public void Morir(bool esPrecipicio = false)
     {
         if (!vivo) return;
