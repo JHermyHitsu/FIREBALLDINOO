@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 5995159309519085762}
   - component: {fileID: 3109306753281098503}
   - component: {fileID: 1412741462568734782}
+  - component: {fileID: 8966138605234019624}
+  - component: {fileID: 1773768253774014731}
   m_Layer: 0
   m_Name: Amigo_dino_rojo
   m_TagString: Untagged
@@ -129,3 +131,44 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0.095}
   m_Size: {x: 0.17, y: 0.19}
   m_Direction: 0
+--- !u!114 &8966138605234019624
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1251341705190589874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f2bb92b29fce6fdabb4cb5093e63ec6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DinoSeguidor
+  distanciaDetras: 0.7
+  suavizadoHorizontal: 14
+  offsetVertical: 0
+  reclutado: 0
+  pasosSeparacion: 9
+  distanciaRayoSuelo: 1
+  tiempoLimiteSinSuelo: 0.8
+--- !u!95 &1773768253774014731
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1251341705190589874}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 22100000, guid: 2646fbb6f0f4038c7acb6c360e0b3180, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

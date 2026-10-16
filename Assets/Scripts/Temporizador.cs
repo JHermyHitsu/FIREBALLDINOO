@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
@@ -19,6 +18,9 @@ public class Temporizador : MonoBehaviour
     public TextMeshProUGUI textoTiempo;
     public GameObject panelGameOver; // arrastra PanelGameOver aquí
     public TextMeshProUGUI textoMensaje; // arrastra Texto_TiempoAgotado aquí
+    [Header("Victoria (se crea solo si falta)")]
+    public GameObject panelVictoria;
+    public TextMeshProUGUI textoVictoria;
     bool terminado = false;
 
     void Awake()
@@ -39,9 +41,12 @@ public class Temporizador : MonoBehaviour
 
     void AlCargarEscena(Scene escena, LoadSceneMode modo)
     {
-        // Si se vuelve a una escena sin haber terminado, el panel no debe quedar visible.
-        if (!terminado && panelGameOver != null)
-            panelGameOver.SetActive(false);
+        // Si se vuelve a una escena sin haber terminado, ningún panel debe quedar visible.
+        if (!terminado)
+        {
+            if (panelGameOver != null) panelGameOver.SetActive(false);
+            if (panelVictoria != null) panelVictoria.SetActive(false);
+        }
     }
 
     // Devuelve el Temporizador persistente; lo crea (con UI mínima por código)
@@ -61,9 +66,9 @@ public class Temporizador : MonoBehaviour
     // Si las referencias del inspector se perdieron, construye una UI persistente por código.
     public void AsegurarUI()
     {
-        if (panelGameOver != null && textoMensaje != null && textoTiempo != null)
-            return;
-        ConstruirUIPersistente();
+        if (panelGameOver == null || textoMensaje == null || textoTiempo == null)
+            ConstruirUIPersistente();
+        AsegurarPanelVictoria();
     }
 
     void ConstruirUIPersistente()
@@ -142,6 +147,78 @@ public class Temporizador : MonoBehaviour
         rtLbl.offsetMax = Vector2.zero;
 
         panelGameOver.SetActive(false);
+
+        ConstruirPanelVictoria(canvasGO.transform);
+    }
+
+    Transform ObtenerCanvas()
+    {
+        if (panelGameOver != null) return panelGameOver.transform.parent;
+        Transform c = transform.Find("CanvasPersistente");
+        return c;
+    }
+
+    // El panel de victoria no existe en las escenas: siempre se crea por código
+    // bajo el Canvas persistente, para no depender de prefabs por bioma.
+    void AsegurarPanelVictoria()
+    {
+        if (panelVictoria != null && textoVictoria != null) return;
+        Transform canvasT = ObtenerCanvas();
+        if (canvasT == null) return; // sin canvas no hay dónde construir
+        if (panelVictoria != null) Destroy(panelVictoria);
+        ConstruirPanelVictoria(canvasT);
+    }
+
+    void ConstruirPanelVictoria(Transform canvasT)
+    {
+        panelVictoria = new GameObject("PanelVictoria");
+        panelVictoria.transform.SetParent(canvasT, false);
+        var fondo = panelVictoria.AddComponent<Image>();
+        fondo.color = new Color(0.05f, 0.2f, 0.05f, 0.75f);
+        var rtPanel = panelVictoria.GetComponent<RectTransform>();
+        rtPanel.anchorMin = Vector2.zero;
+        rtPanel.anchorMax = Vector2.one;
+        rtPanel.offsetMin = Vector2.zero;
+        rtPanel.offsetMax = Vector2.zero;
+
+        var msgGO = new GameObject("Texto_Victoria");
+        msgGO.transform.SetParent(panelVictoria.transform, false);
+        textoVictoria = msgGO.AddComponent<TextMeshProUGUI>();
+        textoVictoria.alignment = TextAlignmentOptions.Center;
+        textoVictoria.fontSize = 40;
+        textoVictoria.text = "¡REFUGIO ALCANZADO!";
+        var rtMsg = msgGO.GetComponent<RectTransform>();
+        rtMsg.anchorMin = new Vector2(0.5f, 0.5f);
+        rtMsg.anchorMax = new Vector2(0.5f, 0.5f);
+        rtMsg.anchoredPosition = new Vector2(0f, 60f);
+        rtMsg.sizeDelta = new Vector2(640f, 160f);
+
+        var btnGO = new GameObject("BotonJugarDeNuevo");
+        btnGO.transform.SetParent(panelVictoria.transform, false);
+        var img = btnGO.AddComponent<Image>();
+        img.color = Color.white;
+        var btn = btnGO.AddComponent<Button>();
+        btn.onClick.AddListener(Reintentar);
+        var rtBtn = btnGO.GetComponent<RectTransform>();
+        rtBtn.anchorMin = new Vector2(0.5f, 0.5f);
+        rtBtn.anchorMax = new Vector2(0.5f, 0.5f);
+        rtBtn.anchoredPosition = new Vector2(0f, -100f);
+        rtBtn.sizeDelta = new Vector2(260f, 60f);
+
+        var lblGO = new GameObject("Texto_Boton");
+        lblGO.transform.SetParent(btnGO.transform, false);
+        var lbl = lblGO.AddComponent<TextMeshProUGUI>();
+        lbl.alignment = TextAlignmentOptions.Center;
+        lbl.fontSize = 28;
+        lbl.color = Color.black;
+        lbl.text = "JUGAR DE NUEVO";
+        var rtLbl = lblGO.GetComponent<RectTransform>();
+        rtLbl.anchorMin = Vector2.zero;
+        rtLbl.anchorMax = Vector2.one;
+        rtLbl.offsetMin = Vector2.zero;
+        rtLbl.offsetMax = Vector2.zero;
+
+        panelVictoria.SetActive(false);
     }
 
     void Update()
@@ -170,8 +247,36 @@ public class Temporizador : MonoBehaviour
         var mov = FindFirstObjectByType<Movimiento>();
         if (mov != null) mov.enabled = false; // frena al dino, ya no es Morir()
         if (textoTiempo != null) textoTiempo.gameObject.SetActive(false);
+        if (panelVictoria != null) panelVictoria.SetActive(false);
         if (textoMensaje != null) textoMensaje.text = mensaje;
         if (panelGameOver != null) panelGameOver.SetActive(true);
+    }
+
+    // Victoria al llegar a la MetaFinal: congela reloj y dino, muestra stats.
+    public void MostrarVictoria(string mensaje = "¡REFUGIO ALCANZADO!")
+    {
+        if (terminado) return; // si ya murió o se acabó el tiempo, no hay victoria
+        AsegurarUI();
+        terminado = true;
+
+        int rescatados = 0;
+        var mov = FindFirstObjectByType<Movimiento>();
+        if (mov != null)
+        {
+            mov.enabled = false;
+            foreach (var s in mov.seguidores)
+                if (s != null) rescatados++;
+        }
+
+        float usado = Mathf.Max(0f, tiempoInicial - tiempoRestante);
+        int mu = Mathf.FloorToInt(usado / 60f);
+        int su = Mathf.FloorToInt(usado % 60f);
+
+        if (textoTiempo != null) textoTiempo.gameObject.SetActive(false);
+        if (panelGameOver != null) panelGameOver.SetActive(false);
+        if (textoVictoria != null)
+            textoVictoria.text = $"{mensaje}\nDinos rescatados: {rescatados}\nTiempo: {mu:00}:{su:00}";
+        if (panelVictoria != null) panelVictoria.SetActive(true);
     }
 
     public void AgregarTiempo(float seg) { if(!terminado) tiempoRestante += seg; }
@@ -188,6 +293,7 @@ public class Temporizador : MonoBehaviour
             textoTiempo.text = $"{m:00}:{s:00}";
         }
         if (panelGameOver != null) panelGameOver.SetActive(false);
+        if (panelVictoria != null) panelVictoria.SetActive(false);
         DinoSeguidor.LimpiarHistorial(); // la fila no debe arrastrar posiciones del bioma anterior
         TransicionManager.EnsureExists(); // garantiza el intercambio del jugador al recargar
         SceneManager.LoadScene(EscenaBosque);
