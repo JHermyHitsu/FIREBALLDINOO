@@ -154,9 +154,9 @@ public class Movimiento : MonoBehaviour
 
     void MostrarBotonMuerte()
     {
-        var temp = FindFirstObjectByType<Temporizador>();
-        if (temp != null) temp.MostrarGameOver("TE CAISTE");
-        else ReiniciarNivel();
+        // El Temporizador es persistente; EnsureExists cubre el Play directo
+        // en Desierto/Cueva. Reintentar vuelve siempre a Bosque.
+        Temporizador.EnsureExists().MostrarGameOver("TE CAISTE");
     }
 
     private void ReiniciarNivel()

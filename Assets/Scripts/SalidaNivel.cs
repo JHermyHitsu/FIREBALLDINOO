@@ -21,12 +21,8 @@ public class SalidaNivel : MonoBehaviour
     void OnTriggerEnter2D(Collider2D otro)
     {
         if (!otro.CompareTag("Player")) return;
-        if (TransicionManager.Instance == null)
-        {
-            Debug.LogError("[SalidaNivel] no hay TransicionManager en escena.");
-            return;
-        }
-        TransicionManager.Instance.IrA(escenaDestino, spawnDestino);
+        // Si la escena no trae manager (Play directo), se crea uno persistente.
+        TransicionManager.EnsureExists().IrA(escenaDestino, spawnDestino);
     }
 
     // Cajita visible solo en el editor para colocarla bien al borde.

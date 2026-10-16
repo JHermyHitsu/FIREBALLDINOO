@@ -1,10 +1,19 @@
 using UnityEngine;
-using TMPro;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using TMPro;
 
+// Reloj global + pantalla de Game Over.
+// El GameObject es persistente (DontDestroyOnLoad) junto con su Canvas hijo,
+// por eso el panel funciona en Bosque, Desierto y Cueva.
+// "Reintentar" vuelve siempre a ESCENA_BIOMA_BOSQUE con el tiempo reseteado.
 public class Temporizador : MonoBehaviour
 {
     public static Temporizador Instance;
+    public const string EscenaBosque = "ESCENA_BIOMA_BOSQUE";
+
+    [Header("Configuración")]
     public float tiempoInicial = 180f;
     public float tiempoRestante;
     public TextMeshProUGUI textoTiempo;
@@ -18,7 +27,123 @@ public class Temporizador : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
         tiempoRestante = tiempoInicial;
+        AsegurarUI();
+        SceneManager.sceneLoaded += AlCargarEscena;
     }
+
+    void OnDestroy()
+    {
+        if (Instance == this)
+            SceneManager.sceneLoaded -= AlCargarEscena;
+    }
+
+    void AlCargarEscena(Scene escena, LoadSceneMode modo)
+    {
+        // Si se vuelve a una escena sin haber terminado, el panel no debe quedar visible.
+        if (!terminado && panelGameOver != null)
+            panelGameOver.SetActive(false);
+    }
+
+    // Devuelve el Temporizador persistente; lo crea (con UI mínima por código)
+    // si la escena actual no trae uno (p. ej. Play directo en Desierto/Cueva).
+    public static Temporizador EnsureExists()
+    {
+        var existente = FindFirstObjectByType<Temporizador>();
+        if (existente != null)
+        {
+            existente.AsegurarUI();
+            return existente;
+        }
+        var go = new GameObject("GameManager");
+        return go.AddComponent<Temporizador>(); // Awake() construye la UI de respaldo
+    }
+
+    // Si las referencias del inspector se perdieron, construye una UI persistente por código.
+    public void AsegurarUI()
+    {
+        if (panelGameOver != null && textoMensaje != null && textoTiempo != null)
+            return;
+        ConstruirUIPersistente();
+    }
+
+    void ConstruirUIPersistente()
+    {
+        Transform viejo = transform.Find("CanvasPersistente");
+        if (viejo != null) Destroy(viejo.gameObject);
+
+        var canvasGO = new GameObject("CanvasPersistente");
+        canvasGO.transform.SetParent(transform, false);
+        var canvas = canvasGO.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 100;
+        canvasGO.AddComponent<GraphicRaycaster>();
+        var scaler = canvasGO.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(800f, 600f);
+
+        // Reloj HUD (arriba al centro)
+        var relojGO = new GameObject("TextoTiempo");
+        relojGO.transform.SetParent(canvasGO.transform, false);
+        textoTiempo = relojGO.AddComponent<TextMeshProUGUI>();
+        textoTiempo.alignment = TextAlignmentOptions.Center;
+        textoTiempo.fontSize = 36;
+        var rtReloj = relojGO.GetComponent<RectTransform>();
+        rtReloj.anchorMin = new Vector2(0.5f, 1f);
+        rtReloj.anchorMax = new Vector2(0.5f, 1f);
+        rtReloj.anchoredPosition = new Vector2(0f, -40f);
+        rtReloj.sizeDelta = new Vector2(200f, 50f);
+
+        // Panel de Game Over (pantalla completa, inicia oculto)
+        panelGameOver = new GameObject("PanelGameOver");
+        panelGameOver.transform.SetParent(canvasGO.transform, false);
+        var fondo = panelGameOver.AddComponent<Image>();
+        fondo.color = new Color(0f, 0f, 0f, 0.6f);
+        var rtPanel = panelGameOver.GetComponent<RectTransform>();
+        rtPanel.anchorMin = Vector2.zero;
+        rtPanel.anchorMax = Vector2.one;
+        rtPanel.offsetMin = Vector2.zero;
+        rtPanel.offsetMax = Vector2.zero;
+
+        var msgGO = new GameObject("Texto_TiempoAgotado");
+        msgGO.transform.SetParent(panelGameOver.transform, false);
+        textoMensaje = msgGO.AddComponent<TextMeshProUGUI>();
+        textoMensaje.alignment = TextAlignmentOptions.Center;
+        textoMensaje.fontSize = 48;
+        textoMensaje.text = "TIEMPO AGOTADO";
+        var rtMsg = msgGO.GetComponent<RectTransform>();
+        rtMsg.anchorMin = new Vector2(0.5f, 0.5f);
+        rtMsg.anchorMax = new Vector2(0.5f, 0.5f);
+        rtMsg.anchoredPosition = new Vector2(0f, 60f);
+        rtMsg.sizeDelta = new Vector2(600f, 80f);
+
+        var btnGO = new GameObject("BotonReintentar");
+        btnGO.transform.SetParent(panelGameOver.transform, false);
+        var img = btnGO.AddComponent<Image>();
+        img.color = Color.white;
+        var btn = btnGO.AddComponent<Button>();
+        btn.onClick.AddListener(Reintentar);
+        var rtBtn = btnGO.GetComponent<RectTransform>();
+        rtBtn.anchorMin = new Vector2(0.5f, 0.5f);
+        rtBtn.anchorMax = new Vector2(0.5f, 0.5f);
+        rtBtn.anchoredPosition = new Vector2(0f, -60f);
+        rtBtn.sizeDelta = new Vector2(220f, 60f);
+
+        var lblGO = new GameObject("Texto_Boton");
+        lblGO.transform.SetParent(btnGO.transform, false);
+        var lbl = lblGO.AddComponent<TextMeshProUGUI>();
+        lbl.alignment = TextAlignmentOptions.Center;
+        lbl.fontSize = 28;
+        lbl.color = Color.black;
+        lbl.text = "REINTENTAR";
+        var rtLbl = lblGO.GetComponent<RectTransform>();
+        rtLbl.anchorMin = Vector2.zero;
+        rtLbl.anchorMax = Vector2.one;
+        rtLbl.offsetMin = Vector2.zero;
+        rtLbl.offsetMax = Vector2.zero;
+
+        panelGameOver.SetActive(false);
+    }
+
     void Update()
     {
         if (terminado) return;
@@ -37,8 +162,10 @@ public class Temporizador : MonoBehaviour
             MostrarGameOver();
         }
     }
+
     public void MostrarGameOver(string mensaje = "TIEMPO AGOTADO")
     {
+        AsegurarUI();
         terminado = true;
         var mov = FindFirstObjectByType<Movimiento>();
         if (mov != null) mov.enabled = false; // frena al dino, ya no es Morir()
@@ -46,9 +173,10 @@ public class Temporizador : MonoBehaviour
         if (textoMensaje != null) textoMensaje.text = mensaje;
         if (panelGameOver != null) panelGameOver.SetActive(true);
     }
+
     public void AgregarTiempo(float seg) { if(!terminado) tiempoRestante += seg; }
 
-    public void Reintentar() // opción A: todo desde Bosque
+    public void Reintentar() // vuelve siempre a Bosque con el tiempo reseteado
     {
         terminado = false;
         tiempoRestante = tiempoInicial;
@@ -60,6 +188,8 @@ public class Temporizador : MonoBehaviour
             textoTiempo.text = $"{m:00}:{s:00}";
         }
         if (panelGameOver != null) panelGameOver.SetActive(false);
-        SceneManager.LoadScene("ESCENA_BIOMA_BOSQUE");
+        DinoSeguidor.LimpiarHistorial(); // la fila no debe arrastrar posiciones del bioma anterior
+        TransicionManager.EnsureExists(); // garantiza el intercambio del jugador al recargar
+        SceneManager.LoadScene(EscenaBosque);
     }
 }

@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 // Manager único que controla los cambios de escena caminando.
 // Vive entre escenas (DontDestroyOnLoad) y es el ÚNICO que debería llamar a SceneManager.
@@ -22,6 +24,8 @@ public class TransicionManager : MonoBehaviour
 
     public bool EnTransicion { get; private set; }
 
+    const string NombreEventSystem = "EventSystem_Persistente";
+
     // Jugador y seguidores que viajan entre escenas.
     GameObject jugadorPersistente;
     readonly List<DinoSeguidor> filaViajera = new List<DinoSeguidor>();
@@ -41,7 +45,81 @@ public class TransicionManager : MonoBehaviour
         if (jugadorPersistente != null)
             DontDestroyOnLoad(jugadorPersistente);
 
+        if (fader == null)
+            CrearFader();
+        AsegurarEventSystem();
+
         SceneManager.sceneLoaded += AlCargarEscena;
+    }
+
+    // Devuelve el manager persistente; lo crea si la escena no trae uno
+    // (p. ej. Play directo en Desierto/Cueva).
+    public static TransicionManager EnsureExists()
+    {
+        if (Instance != null) return Instance;
+        var existente = FindFirstObjectByType<TransicionManager>();
+        if (existente != null) return existente;
+        var go = new GameObject("TransicionManager");
+        return go.AddComponent<TransicionManager>();
+    }
+
+    // El EventSystem de Bosque (con su InputSystemUIInputModule ya configurado)
+    // viaja entre escenas; sin él los botones del Game Over no responden en
+    // Desierto/Cueva, que no traen EventSystem propio.
+    void AsegurarEventSystem()
+    {
+        var sistemas = FindObjectsByType<EventSystem>(FindObjectsSortMode.None);
+        EventSystem nuestro = null;
+        foreach (var s in sistemas)
+            if (s != null && s.gameObject.name == NombreEventSystem) { nuestro = s; break; }
+
+        if (nuestro == null)
+        {
+            foreach (var s in sistemas)
+            {
+                if (s == null) continue;
+                nuestro = s;
+                nuestro.gameObject.name = NombreEventSystem;
+                DontDestroyOnLoad(nuestro.gameObject);
+                break;
+            }
+            if (nuestro == null)
+                nuestro = CrearEventSystem();
+        }
+
+        // Elimina duplicados de escena (p. ej. el EventSystem fresco de Bosque al volver).
+        foreach (var s in sistemas)
+            if (s != null && s != nuestro)
+                Destroy(s.gameObject);
+    }
+
+    EventSystem CrearEventSystem()
+    {
+        var go = new GameObject(NombreEventSystem);
+        go.AddComponent<EventSystem>();
+        go.AddComponent<StandaloneInputModule>();
+        DontDestroyOnLoad(go);
+        return go.GetComponent<EventSystem>();
+    }
+
+    // Fader mínimo por código; solo se usa si el manager se creó sin escena (sin Bosque).
+    void CrearFader()
+    {
+        var go = new GameObject("FaderCanvas");
+        go.transform.SetParent(transform, false);
+        var canvas = go.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 999;
+        var grupo = go.AddComponent<CanvasGroup>();
+        grupo.alpha = 0f;
+        var img = go.AddComponent<Image>();
+        img.color = Color.black;
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
+        fader = grupo;
     }
 
     void OnDestroy()
@@ -56,6 +134,8 @@ public class TransicionManager : MonoBehaviour
     //   y se destruye la fila vieja para empezar limpio.
     void AlCargarEscena(Scene escena, LoadSceneMode modo)
     {
+        AsegurarEventSystem();
+
         GameObject[] jugadores = GameObject.FindGameObjectsWithTag("Player");
         if (jugadores.Length <= 1)
         {
@@ -80,11 +160,22 @@ public class TransicionManager : MonoBehaviour
                     Destroy(s.gameObject);
             filaViajera.Clear();
 
-            if (jugadorPersistente != null)
-                Destroy(jugadorPersistente);
+            // Intercambio al jugador fresco de la escena. Se elige explícitamente
+            // uno distinto al viejo: adoptar jugadores[0] a ciegas podía quedarse
+            // con el cadáver recién destruido (p. ej. reintentar tras morir).
+            GameObject viejo = jugadorPersistente;
+            GameObject nuevo = null;
+            foreach (GameObject j in jugadores)
+                if (j != null && j != viejo) { nuevo = j; break; }
 
-            jugadorPersistente = jugadores[0];
-            DontDestroyOnLoad(jugadorPersistente);
+            if (viejo != null)
+                Destroy(viejo);
+
+            jugadorPersistente = nuevo;
+            if (jugadorPersistente == null)
+                jugadorPersistente = GameObject.FindGameObjectWithTag("Player");
+            if (jugadorPersistente != null)
+                DontDestroyOnLoad(jugadorPersistente);
         }
     }
 
