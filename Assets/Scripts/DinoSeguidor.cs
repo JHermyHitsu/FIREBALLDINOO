@@ -31,7 +31,7 @@ public class DinoSeguidor : MonoBehaviour
 
     [Header("Caída al vacío")]
     public float distanciaRayoSuelo = 1.0f;
-    public float tiempoLimiteSinSuelo = 0.4f;  // Un poco más de tolerancia
+    public float tiempoLimiteSinSuelo = 0.8f;  // Coyote en bordes
 
     private bool cayendo = false;
     private float tiempoSinSuelo = 0f;
@@ -184,16 +184,16 @@ public class DinoSeguidor : MonoBehaviour
 
         Vector3 posObjetivo = historialPosiciones[indiceHistorial];
 
-        // ── Límite de separación mínima (evita que el dino adelante al líder) ──
-        float distMin   = distanciaDetras * (indiceFila + 1);
-        bool  miraIzq   = srLider.flipX;
-        float dirDetras = miraIzq ? 1f : -1f;
-        float xLimite   = lider.transform.position.x + (dirDetras * distMin);
+        // ── Anti-adelanto (evita que el dino pase al líder, sin forzar distancia exacta) ──
+        // Antes se forzaba lider.x ± distMin y al girar en una esquina
+        // teletransportaba al seguidor al vacío. Ahora solo se impide adelantar.
+        float xLider = lider.transform.position.x;
+        bool  miraIzq = srLider.flipX;
 
         if (!miraIzq)
-        { if (posObjetivo.x > xLimite) posObjetivo.x = xLimite; }
+        { if (posObjetivo.x > xLider) posObjetivo.x = xLider; }
         else
-        { if (posObjetivo.x < xLimite) posObjetivo.x = xLimite; }
+        { if (posObjetivo.x < xLider) posObjetivo.x = xLider; }
 
         // ── Suavizado en X y Y para eliminar temblor ──
         // Se interpola TANTO X como Y para que no haya saltos bruscos
@@ -222,11 +222,14 @@ public class DinoSeguidor : MonoBehaviour
 
     public bool TieneSueloDebajo()
     {
-        Vector2 origenCentro = (Vector2)transform.position + Vector2.up * 0.3f;
-        float   dirFrente    = (sr != null && sr.flipX) ? -0.25f : 0.25f;
-        Vector2 origenFrente = origenCentro + new Vector2(dirFrente, 0f);
+        Vector2 baseOrigen = (Vector2)transform.position + Vector2.up * 0.3f;
 
-        return HaySueloEn(origenCentro) || HaySueloEn(origenFrente);
+        // 3 rayos: centro + bordes del sprite. Antes solo centro + frente
+        // (0.25 hacia donde mira), así que parado en la esquina el rayo
+        // central ya estaba en el vacío aunque el sprite pisaba un poco.
+        return HaySueloEn(baseOrigen)
+            || HaySueloEn(baseOrigen + Vector2.left * 0.35f)
+            || HaySueloEn(baseOrigen + Vector2.right * 0.35f);
     }
 
     private bool HaySueloEn(Vector2 origen)
