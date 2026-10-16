@@ -27,7 +27,7 @@ public class DinoSeguidor : MonoBehaviour
     private static Transform ultimoLiderRegistrado;
 
     [Header("Separación en fila")]
-    public int pasosSeparacion = 3;
+    public int pasosSeparacion = 9;
 
     [Header("Caída al vacío")]
     public float distanciaRayoSuelo = 1.0f;
@@ -185,8 +185,6 @@ public class DinoSeguidor : MonoBehaviour
         Vector3 posObjetivo = historialPosiciones[indiceHistorial];
 
         // ── Anti-adelanto (evita que el dino pase al líder, sin forzar distancia exacta) ──
-        // Antes se forzaba lider.x ± distMin y al girar en una esquina
-        // teletransportaba al seguidor al vacío. Ahora solo se impide adelantar.
         float xLider = lider.transform.position.x;
         bool  miraIzq = srLider.flipX;
 
@@ -201,6 +199,21 @@ public class DinoSeguidor : MonoBehaviour
         float t    = suavizadoHorizontal * Time.deltaTime;
         float newX = Mathf.Lerp(transform.position.x, posObjetivo.x, t);
         float newY = Mathf.Lerp(transform.position.y, posObjetivo.y + offsetVertical, t);
+
+        // ── Separación suave detrás (no teletransporta en esquinas) ──
+        // Si ya está del lado correcto pero muy pegado, se aleja poco a poco.
+        // Si quedó del lado contrario por un giro reciente, NO se fuerza:
+        // se deja que el historial lo traiga solo para no lanzarlo al vacío.
+        float sepDeseada = distanciaDetras * (indiceFila + 1);
+        float ladoDetras = miraIzq ? 1f : -1f;
+        float offsetActual = newX - xLider;
+        bool ladoCorrecto = Mathf.Sign(offsetActual) == Mathf.Sign(ladoDetras);
+        bool casiEncima = Mathf.Abs(offsetActual) < 0.05f;
+        if ((ladoCorrecto || casiEncima) && Mathf.Abs(offsetActual) < sepDeseada)
+        {
+            float objetivoSeparado = xLider + ladoDetras * sepDeseada;
+            newX = Mathf.MoveTowards(newX, objetivoSeparado, suavizadoHorizontal * Time.deltaTime * 0.5f);
+        }
 
         transform.position = new Vector3(newX, newY, transform.position.z);
 
