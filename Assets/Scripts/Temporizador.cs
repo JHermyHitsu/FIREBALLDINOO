@@ -26,11 +26,6 @@ public class Temporizador : MonoBehaviour
     float progresoTick = 1f;
     Vector2 posicionBaseTimer = new Vector2(0f, -40f);
 
-    // Contador de amigos (arriba a la izquierda)
-    public TextMeshProUGUI textoContadorAmigos;
-    int ultimoCountAmigos = 0;
-    float progresoPopAmigos = 1f;
-
     void Awake()
     {
         if (Instance != null) { Destroy(gameObject); return; }
@@ -106,20 +101,7 @@ public class Temporizador : MonoBehaviour
         rtReloj.anchoredPosition = new Vector2(0f, -40f);
         rtReloj.sizeDelta = new Vector2(200f, 50f);
 
-        // Contador de amigos (arriba a la izquierda): ícono + número
-        var contadorGO = new GameObject("ContadorAmigos");
-        contadorGO.transform.SetParent(canvasGO.transform, false);
-        var rtContador = contadorGO.AddComponent<RectTransform>();
-        rtContador.anchorMin = new Vector2(0f, 1f);
-        rtContador.anchorMax = new Vector2(0f, 1f);
-        rtContador.anchoredPosition = new Vector2(20f, -40f);
-        rtContador.sizeDelta = new Vector2(120f, 50f);
-
-        textoContadorAmigos = contadorGO.AddComponent<TextMeshProUGUI>();
-        textoContadorAmigos.alignment = TextAlignmentOptions.Left;
-        textoContadorAmigos.fontSize = 36;
-        textoContadorAmigos.color = Color.white;
-        textoContadorAmigos.text = "🦕 0";
+        // Panel de Game Over (pantalla completa, inicia oculto)
         panelGameOver = new GameObject("PanelGameOver");
         panelGameOver.transform.SetParent(canvasGO.transform, false);
         var fondo = panelGameOver.AddComponent<Image>();
@@ -307,32 +289,6 @@ public class Temporizador : MonoBehaviour
                 // No forzar anchoredPosition: respeta la posición definida en la escena
             }
         }
-        // Contador de amigos (arriba a la izquierda) + pop al reclutar
-        if (textoContadorAmigos != null)
-        {
-            int count = 0;
-            var mov = FindFirstObjectByType<Movimiento>();
-            if (mov != null) count = mov.seguidores.Count;
-
-            if (count != ultimoCountAmigos)
-            {
-                ultimoCountAmigos = count;
-                progresoPopAmigos = 0f;
-            }
-            progresoPopAmigos = Mathf.Min(1f, progresoPopAmigos + Time.deltaTime / 0.2f);
-
-            float popScale = 1f;
-            if (progresoPopAmigos < 1f)
-            {
-                if (progresoPopAmigos < 0.5f)
-                    popScale = Mathf.Lerp(1f, 1.3f, progresoPopAmigos / 0.5f);
-                else
-                    popScale = Mathf.Lerp(1.3f, 1f, (progresoPopAmigos - 0.5f) / 0.5f);
-            }
-            textoContadorAmigos.rectTransform.localScale = Vector3.one * popScale;
-            textoContadorAmigos.text = $"🦕 {count}";
-        }
-
         if (tiempoRestante <= 0)
         {
             tiempoRestante = 0;
@@ -348,7 +304,6 @@ public class Temporizador : MonoBehaviour
         var mov = FindFirstObjectByType<Movimiento>();
         if (mov != null) mov.enabled = false; // frena al dino, ya no es Morir()
         if (textoTiempo != null) textoTiempo.gameObject.SetActive(false);
-        if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(false);
         if (panelVictoria != null) panelVictoria.SetActive(false);
         if (textoMensaje != null) textoMensaje.text = mensaje;
         if (panelGameOver != null) panelGameOver.SetActive(true);
@@ -375,7 +330,6 @@ public class Temporizador : MonoBehaviour
         int su = Mathf.FloorToInt(usado % 60f);
 
         if (textoTiempo != null) textoTiempo.gameObject.SetActive(false);
-        if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(false);
         if (panelGameOver != null) panelGameOver.SetActive(false);
         if (textoVictoria != null)
             textoVictoria.text = $"{mensaje}\nDinos rescatados: {rescatados}\nTiempo: {mu:00}:{su:00}";
@@ -390,12 +344,9 @@ public class Temporizador : MonoBehaviour
         tiempoRestante = tiempoInicial;
         ultimoSegundoTick = 9;
         progresoTick = 1f;
-        ultimoCountAmigos = 0;
-        progresoPopAmigos = 1f;
         if (textoTiempo != null)
         {
             textoTiempo.gameObject.SetActive(true);
-            if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(true);
             int m = Mathf.FloorToInt(tiempoRestante / 60f);
             int s = Mathf.FloorToInt(tiempoRestante % 60f);
             textoTiempo.text = $"{m:00}:{s:00}";
