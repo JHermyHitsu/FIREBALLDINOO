@@ -12,6 +12,10 @@ public class DinoSeguidor : MonoBehaviour
     [Tooltip("Ajuste de altura opcional respecto al jugador.")]
     public float offsetVertical = 0f;
 
+    [Header("Sonido")]
+    [Tooltip("Efecto de sonido al morir o ser sacrificado.")]
+    public AudioClip sonidoMuerte;
+
     [Header("Estado")]
     public bool reclutado = false;
 
@@ -170,6 +174,13 @@ public class DinoSeguidor : MonoBehaviour
         reclutado = false;
 
         if (col != null) col.enabled = false;
+
+        AudioClip clip = sonidoMuerte != null ? sonidoMuerte : (lider != null ? lider.sonidoMuerte : null);
+        if (clip != null)
+        {
+            Vector3 posAudio = Camera.main != null ? Camera.main.transform.position : transform.position;
+            AudioSource.PlayClipAtPoint(clip, posAudio);
+        }
 
         if (rb == null) rb = gameObject.AddComponent<Rigidbody2D>();
         rb.bodyType = RigidbodyType2D.Dynamic;

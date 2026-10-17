@@ -198,3 +198,4 @@ MonoBehaviour:
   offsetVertical: 0
   reclutado: 0
   pasosSeparacion: 8
+  sonidoMuerte: {fileID: 8300000, guid: ad48f6502af01f21dafa058c0d4b0179, type: 3}
