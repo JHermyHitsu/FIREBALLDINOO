@@ -27,6 +27,7 @@ public class Movimiento : MonoBehaviour
     private bool vivo = true;
     private float boostMult = 1f;
     private float boostTiempo = 0f;
+    private float inmuneTimer = 0f;
 
     void Start()
     {
@@ -40,6 +41,9 @@ public class Movimiento : MonoBehaviour
     void Update()
     {
         if (!vivo) return;
+
+        if (inmuneTimer > 0f)
+            inmuneTimer -= Time.deltaTime;
 
         entradaX = Input.GetAxisRaw("Horizontal");
 
@@ -114,7 +118,7 @@ public class Movimiento : MonoBehaviour
 
     public void Morir(bool esPrecipicio = false)
     {
-        if (!vivo) return;
+        if (!vivo || inmuneTimer > 0f) return;
 
         // Si hay un dino de vida extra, se sacrifica y da super impulso
         if (seguidores.Count > 0)
@@ -130,7 +134,9 @@ public class Movimiento : MonoBehaviour
 
             if (sfx != null && sonidoSalto != null) sfx.PlayOneShot(sonidoSalto);
 
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, fuerzaSalto * 1.25f);
+            // Ventana de inmunidad mientras el jugador sale impulsado de la zona de daño
+            inmuneTimer = 0.8f;
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, fuerzaSalto * 1.4f);
             estaEnSuelo = false;
             return;
         }
