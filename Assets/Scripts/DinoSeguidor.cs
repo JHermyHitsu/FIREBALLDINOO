@@ -30,8 +30,8 @@ public class DinoSeguidor : MonoBehaviour
     public int pasosSeparacion = 9;
 
     [Header("Caída al vacío")]
-    public float distanciaRayoSuelo = 1.0f;
-    public float tiempoLimiteSinSuelo = 0.8f;  // Coyote en bordes
+    public float distanciaRayoSuelo = 1.2f;
+    public float tiempoLimiteSinSuelo = 1.5f;  // Coyote en bordes — más tolerante en esquinas
 
     private bool cayendo = false;
     private float tiempoSinSuelo = 0f;
@@ -39,7 +39,7 @@ public class DinoSeguidor : MonoBehaviour
     // ── Gracia de reclutamiento: durante este tiempo NO se comprueba suelo
     //    (evita falsos positivos al recrutar un dino que aún está en el aire
     //    en su posición inicial antes de que el historial lo lleve al suelo)
-    private float tiempoGraciaReclutamiento = 0.5f;
+    private float tiempoGraciaReclutamiento = 0.8f;
     private float gracia = 0f;
 
     void Awake()
@@ -129,7 +129,13 @@ public class DinoSeguidor : MonoBehaviour
             //    y el período de gracia ya terminó ──
             if (lider.EstaEnSuelo())
             {
-                if (!TieneSueloDebajo())
+                // Solo activar detección si el dino ya está lejos del líder.
+                // Cuando el historial lo arrastra por una esquina, la distancia
+                // al líder es corta → no es un precipicio real, es un giro.
+                float distAlLider = Vector2.Distance(transform.position, lider.transform.position);
+                bool enEsquina = distAlLider < 2.5f;
+
+                if (!TieneSueloDebajo() && !enEsquina)
                 {
                     tiempoSinSuelo += Time.deltaTime;
                     if (tiempoSinSuelo >= tiempoLimiteSinSuelo)
@@ -237,12 +243,13 @@ public class DinoSeguidor : MonoBehaviour
     {
         Vector2 baseOrigen = (Vector2)transform.position + Vector2.up * 0.3f;
 
-        // 3 rayos: centro + bordes del sprite. Antes solo centro + frente
-        // (0.25 hacia donde mira), así que parado en la esquina el rayo
-        // central ya estaba en el vacío aunque el sprite pisaba un poco.
+        // 5 rayos: centro + bordes medios + bordes extremos del sprite.
+        // Cubre mejor las esquinas de plataformas angostas.
         return HaySueloEn(baseOrigen)
-            || HaySueloEn(baseOrigen + Vector2.left * 0.35f)
-            || HaySueloEn(baseOrigen + Vector2.right * 0.35f);
+            || HaySueloEn(baseOrigen + Vector2.left  * 0.20f)
+            || HaySueloEn(baseOrigen + Vector2.right * 0.20f)
+            || HaySueloEn(baseOrigen + Vector2.left  * 0.42f)
+            || HaySueloEn(baseOrigen + Vector2.right * 0.42f);
     }
 
     private bool HaySueloEn(Vector2 origen)

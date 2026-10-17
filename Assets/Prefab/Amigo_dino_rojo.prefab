@@ -148,8 +148,8 @@ MonoBehaviour:
   offsetVertical: 0
   reclutado: 0
   pasosSeparacion: 9
-  distanciaRayoSuelo: 1
-  tiempoLimiteSinSuelo: 0.8
+  distanciaRayoSuelo: 1.2
+  tiempoLimiteSinSuelo: 1.5
 --- !u!95 &1773768253774014731
 Animator:
   serializedVersion: 7
