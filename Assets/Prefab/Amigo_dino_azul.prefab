@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 6.05, y: -0.56, z: 0}
-  m_LocalScale: {x: 13, y: 13, z: 0.17649}
+  m_LocalScale: {x: 13, y: 13, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -128,8 +128,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.0035049366, y: 0.0017882861}
-  m_Size: {x: 0.1464155, y: 0.16670051}
+  m_Offset: {x: -0.0035049366, y: 0.095088296}
+  m_Size: {x: 0.1464155, y: 0.17574356}
   m_Direction: 0
 --- !u!95 &5731895711176291454
 Animator:
@@ -165,4 +165,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f2bb92b29fce6fdabb4cb5093e63ec6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DinoSeguidor
+  distanciaDetras: 0.75
+  suavizadoHorizontal: 12
+  offsetVertical: 0
   reclutado: 0
+  pasosSeparacion: 9

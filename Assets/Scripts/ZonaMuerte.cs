@@ -16,17 +16,12 @@ public class ZonaMuerte : MonoBehaviour
     private void DetectarCaida(Collider2D otro)
     {
         // Si el objeto que cayó en el precipicio es el jugador
+        // (Si tiene seguidores, Movimiento.Morir sacrifica uno automáticamente para impulsarlo)
         if (otro.CompareTag("Player"))
         {
             Movimiento dino = otro.GetComponent<Movimiento>();
             if (dino != null)
                 dino.Morir(esPrecipicio: true);
-        }
-        else
-        {
-            DinoSeguidor seguidor = otro.GetComponent<DinoSeguidor>();
-            if (seguidor != null)
-                seguidor.CaerYMorir();
         }
     }
 }
