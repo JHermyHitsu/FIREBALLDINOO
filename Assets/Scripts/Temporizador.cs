@@ -22,6 +22,9 @@ public class Temporizador : MonoBehaviour
     public GameObject panelVictoria;
     public TextMeshProUGUI textoVictoria;
     bool terminado = false;
+    int ultimoSegundoTick = 9;
+    float progresoTick = 1f;
+    Vector2 posicionBaseTimer = new Vector2(0f, -40f);
 
     void Awake()
     {
@@ -91,7 +94,7 @@ public class Temporizador : MonoBehaviour
         relojGO.transform.SetParent(canvasGO.transform, false);
         textoTiempo = relojGO.AddComponent<TextMeshProUGUI>();
         textoTiempo.alignment = TextAlignmentOptions.Center;
-        textoTiempo.fontSize = 36;
+        textoTiempo.fontSize = 42;
         var rtReloj = relojGO.GetComponent<RectTransform>();
         rtReloj.anchorMin = new Vector2(0.5f, 1f);
         rtReloj.anchorMax = new Vector2(0.5f, 1f);
@@ -231,6 +234,60 @@ public class Temporizador : MonoBehaviour
             int m = Mathf.FloorToInt(tiempoRestante / 60f);
             int s = Mathf.FloorToInt(tiempoRestante % 60f);
             textoTiempo.text = $"{m:00}:{s:00}";
+
+            // Color rojo neón a partir del segundo 15
+            if (tiempoRestante <= 15f)
+                textoTiempo.color = new Color(1f, 0.165f, 0.294f); // #ff2a4b
+            else
+                textoTiempo.color = Color.white;
+
+            // Tick de pánico cada segundo a partir del segundo 8 (scale + rotación + desplazamiento)
+            if (tiempoRestante <= 8f && tiempoRestante > 0f)
+            {
+                int segundoActual = Mathf.FloorToInt(tiempoRestante);
+                if (segundoActual != ultimoSegundoTick)
+                {
+                    ultimoSegundoTick = segundoActual;
+                    progresoTick = 0f;
+                    // Capturar la posición base real del timer en la escena
+                    posicionBaseTimer = textoTiempo.rectTransform.anchoredPosition;
+                }
+                progresoTick = Mathf.Min(1f, progresoTick + Time.deltaTime / 0.2f);
+
+                float t = progresoTick;
+                float scale, rot, x;
+                if (t < 0.3f)
+                {
+                    float p = t / 0.3f;
+                    scale = Mathf.Lerp(1f, 1.12f, p);
+                    rot = Mathf.Lerp(0f, -1.5f, p);
+                    x = Mathf.Lerp(0f, -3f, p);
+                }
+                else if (t < 0.6f)
+                {
+                    float p = (t - 0.3f) / 0.3f;
+                    scale = Mathf.Lerp(1.12f, 1.05f, p);
+                    rot = Mathf.Lerp(-1.5f, 1f, p);
+                    x = Mathf.Lerp(-3f, 2f, p);
+                }
+                else
+                {
+                    float p = (t - 0.6f) / 0.4f;
+                    scale = Mathf.Lerp(1.05f, 1f, p);
+                    rot = Mathf.Lerp(1f, 0f, p);
+                    x = Mathf.Lerp(2f, 0f, p);
+                }
+
+                textoTiempo.rectTransform.localScale = Vector3.one * scale;
+                textoTiempo.rectTransform.localEulerAngles = new Vector3(0f, 0f, rot);
+                textoTiempo.rectTransform.anchoredPosition = new Vector2(posicionBaseTimer.x + x, posicionBaseTimer.y);
+            }
+            else
+            {
+                textoTiempo.rectTransform.localScale = Vector3.one;
+                textoTiempo.rectTransform.localEulerAngles = Vector3.zero;
+                // No forzar anchoredPosition: respeta la posición definida en la escena
+            }
         }
         if (tiempoRestante <= 0)
         {
@@ -285,6 +342,8 @@ public class Temporizador : MonoBehaviour
     {
         terminado = false;
         tiempoRestante = tiempoInicial;
+        ultimoSegundoTick = 9;
+        progresoTick = 1f;
         if (textoTiempo != null)
         {
             textoTiempo.gameObject.SetActive(true);
