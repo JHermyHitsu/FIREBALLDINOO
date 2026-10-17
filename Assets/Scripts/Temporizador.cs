@@ -233,7 +233,6 @@ public class Temporizador : MonoBehaviour
         textoMensaje = msgGO.AddComponent<TextMeshProUGUI>();
         textoMensaje.alignment = TextAlignmentOptions.Center;
         textoMensaje.fontSize = 48;
-        textoMensaje.text = "TIEMPO AGOTADO";
         var rtMsg = msgGO.GetComponent<RectTransform>();
         rtMsg.anchorMin = new Vector2(0.5f, 0.5f);
         rtMsg.anchorMax = new Vector2(0.5f, 0.5f);
@@ -476,7 +475,7 @@ public class Temporizador : MonoBehaviour
         }
     }
 
-    public void MostrarGameOver(string mensaje = "TIEMPO AGOTADO")
+    public void MostrarGameOver()
     {
         AsegurarUI();
         terminado = true;
@@ -489,7 +488,7 @@ public class Temporizador : MonoBehaviour
             foreach (var s in segmentosBoost)
                 if (s != null) s.gameObject.SetActive(false);
         if (panelVictoria != null) panelVictoria.SetActive(false);
-        if (textoMensaje != null) textoMensaje.text = mensaje;
+        // No sobrescribir el texto: se respeta lo configurado en el inspector.
         if (panelGameOver != null) panelGameOver.SetActive(true);
     }
 
