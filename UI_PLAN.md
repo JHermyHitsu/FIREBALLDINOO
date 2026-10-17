@@ -20,16 +20,17 @@
 
 ## 2. Contador de amigos (arriba a la izquierda)
 
-**Estado actual:** No existe. `Movimiento.cs` tiene `seguidores.Count` pero no hay UI que lo muestre.
+**Estado:** ✅ Implementado en `Temporizador.cs` (rehhecho).
 
-**Cambios a hacer:**
-- [ ] Crear un GameObject con Image (ícono de dino) + TextMeshProUGUI (número) anclado arriba a la izquierda.
-- [ ] Actualizar el número en tiempo real desde `Movimiento.seguidores.Count`.
-- [ ] Al reclutar un amigo (`AgregarSeguidor`), disparar un pop: escala 1 → 1.3 → 1 en ~0.2s.
-- [ ] Si `seguidores.Count == 0`, mostrar "0" en gris/desaturado (no ocultar el ícono).
-- [ ] Sin texto descriptivo ("Amigos:", etc.) — solo ícono + número.
+**Cambios realizados:**
+- [x] GameObject "ContadorAmigos" creado por código, anclado arriba a la izquierda (ícono 🦕 + número).
+- [x] Se crea aunque la escena traiga UI por inspector (canvas fallback).
+- [x] Actualizado cada frame desde `Movimiento.seguidores.Count`.
+- [x] Pop (scale 1→1.3→1) al reclutar un amigo.
+- [x] Se oculta en Game Over/Victoria y se reactiva al reintentar.
+- [ ] (Opcional) Reemplazar emoji por sprite de dino si la fuente no lo renderiza.
 
-**Referencia en código:** `Movimiento.cs` → `AgregarSeguidor()` / `RemoverSeguidor()`.
+**Referencia en código:** `Temporizador.cs` → `Update()` y `AsegurarContadorAmigos()`.
 
 ---
 
