@@ -18,6 +18,10 @@ public class Temporizador : MonoBehaviour
     public TextMeshProUGUI textoTiempo;
     public TextMeshProUGUI textoContadorAmigos; // contador de amigos (arriba a la izquierda)
     public GameObject panelGameOver; // arrastra PanelGameOver aquí
+
+    // Estado del contador de amigos
+    int ultimoCountAmigos = 0;
+    float progresoPopAmigos = 1f;
     public TextMeshProUGUI textoMensaje; // arrastra Texto_TiempoAgotado aquí
     [Header("Victoria (se crea solo si falta)")]
     public GameObject panelVictoria;
@@ -72,7 +76,46 @@ public class Temporizador : MonoBehaviour
     {
         if (panelGameOver == null || textoMensaje == null || textoTiempo == null)
             ConstruirUIPersistente();
+        AsegurarContadorAmigos();
         AsegurarPanelVictoria();
+    }
+
+    // Fallback por código: crea el contador si la escena no lo trae.
+    void AsegurarContadorAmigos()
+    {
+        if (textoContadorAmigos != null) return;
+
+        Transform canvasT = null;
+        if (textoTiempo != null) canvasT = textoTiempo.transform.parent;
+        if (canvasT == null) canvasT = transform.Find("CanvasPersistente");
+
+        if (canvasT == null)
+        {
+            var canvasGO = new GameObject("CanvasPersistente");
+            canvasGO.transform.SetParent(transform, false);
+            var canvas = canvasGO.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 100;
+            canvasGO.AddComponent<GraphicRaycaster>();
+            var scaler = canvasGO.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(800f, 600f);
+            canvasT = canvasGO.transform;
+        }
+
+        var contadorGO = new GameObject("ContadorAmigos");
+        contadorGO.transform.SetParent(canvasT, false);
+        var rtContador = contadorGO.AddComponent<RectTransform>();
+        rtContador.anchorMin = new Vector2(0f, 1f);
+        rtContador.anchorMax = new Vector2(0f, 1f);
+        rtContador.anchoredPosition = new Vector2(20f, -40f);
+        rtContador.sizeDelta = new Vector2(120f, 50f);
+
+        textoContadorAmigos = contadorGO.AddComponent<TextMeshProUGUI>();
+        textoContadorAmigos.alignment = TextAlignmentOptions.Left;
+        textoContadorAmigos.fontSize = 36;
+        textoContadorAmigos.color = Color.white;
+        textoContadorAmigos.text = "0";
     }
 
     void ConstruirUIPersistente()
@@ -290,6 +333,32 @@ public class Temporizador : MonoBehaviour
                 // No forzar anchoredPosition: respeta la posición definida en la escena
             }
         }
+        // Contador de amigos: se sincroniza con Movimiento.seguidores
+        if (textoContadorAmigos != null)
+        {
+            int count = 0;
+            var mov = FindFirstObjectByType<Movimiento>();
+            if (mov != null) count = mov.seguidores.Count;
+
+            if (count != ultimoCountAmigos)
+            {
+                ultimoCountAmigos = count;
+                progresoPopAmigos = 0f;
+            }
+            progresoPopAmigos = Mathf.Min(1f, progresoPopAmigos + Time.deltaTime / 0.2f);
+
+            float popScale = 1f;
+            if (progresoPopAmigos < 1f)
+            {
+                if (progresoPopAmigos < 0.5f)
+                    popScale = Mathf.Lerp(1f, 1.3f, progresoPopAmigos / 0.5f);
+                else
+                    popScale = Mathf.Lerp(1.3f, 1f, (progresoPopAmigos - 0.5f) / 0.5f);
+            }
+            textoContadorAmigos.rectTransform.localScale = Vector3.one * popScale;
+            textoContadorAmigos.text = $"{count}";
+        }
+
         if (tiempoRestante <= 0)
         {
             tiempoRestante = 0;
@@ -305,6 +374,7 @@ public class Temporizador : MonoBehaviour
         var mov = FindFirstObjectByType<Movimiento>();
         if (mov != null) mov.enabled = false; // frena al dino, ya no es Morir()
         if (textoTiempo != null) textoTiempo.gameObject.SetActive(false);
+        if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(false);
         if (panelVictoria != null) panelVictoria.SetActive(false);
         if (textoMensaje != null) textoMensaje.text = mensaje;
         if (panelGameOver != null) panelGameOver.SetActive(true);
@@ -331,6 +401,7 @@ public class Temporizador : MonoBehaviour
         int su = Mathf.FloorToInt(usado % 60f);
 
         if (textoTiempo != null) textoTiempo.gameObject.SetActive(false);
+        if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(false);
         if (panelGameOver != null) panelGameOver.SetActive(false);
         if (textoVictoria != null)
             textoVictoria.text = $"{mensaje}\nDinos rescatados: {rescatados}\nTiempo: {mu:00}:{su:00}";
@@ -345,9 +416,12 @@ public class Temporizador : MonoBehaviour
         tiempoRestante = tiempoInicial;
         ultimoSegundoTick = 9;
         progresoTick = 1f;
+        ultimoCountAmigos = 0;
+        progresoPopAmigos = 1f;
         if (textoTiempo != null)
         {
             textoTiempo.gameObject.SetActive(true);
+            if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(true);
             int m = Mathf.FloorToInt(tiempoRestante / 60f);
             int s = Mathf.FloorToInt(tiempoRestante % 60f);
             textoTiempo.text = $"{m:00}:{s:00}";
