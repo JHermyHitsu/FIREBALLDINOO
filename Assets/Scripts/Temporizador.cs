@@ -17,6 +17,8 @@ public class Temporizador : MonoBehaviour
     public float tiempoRestante;
     public TextMeshProUGUI textoTiempo;
     public TextMeshProUGUI textoContadorAmigos; // contador de amigos (arriba a la izquierda)
+    public Image barraBoost; // barra de boost (abajo al centro)
+    public Image[] segmentosBoost; // segmentos de boost estilo Subway Surfers
     public GameObject panelGameOver; // arrastra PanelGameOver aquí
 
     // Estado del contador de amigos
@@ -77,6 +79,8 @@ public class Temporizador : MonoBehaviour
         if (panelGameOver == null || textoMensaje == null || textoTiempo == null)
             ConstruirUIPersistente();
         AsegurarContadorAmigos();
+        AsegurarBarraBoost();
+        AsegurarSegmentosBoost();
         AsegurarPanelVictoria();
     }
 
@@ -116,6 +120,74 @@ public class Temporizador : MonoBehaviour
         textoContadorAmigos.fontSize = 36;
         textoContadorAmigos.color = Color.white;
         textoContadorAmigos.text = "0";
+    }
+
+    // Fallback por código: crea la barra de boost si la escena no la trae.
+    void AsegurarBarraBoost()
+    {
+        if (barraBoost != null) return;
+
+        Transform canvasT = null;
+        if (textoTiempo != null) canvasT = textoTiempo.transform.parent;
+        if (canvasT == null) canvasT = transform.Find("CanvasPersistente");
+
+        if (canvasT == null)
+        {
+            var canvasGO = new GameObject("CanvasPersistente");
+            canvasGO.transform.SetParent(transform, false);
+            var canvas = canvasGO.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 100;
+            canvasGO.AddComponent<GraphicRaycaster>();
+            var scaler = canvasGO.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(800f, 600f);
+            canvasT = canvasGO.transform;
+        }
+
+        var barraGO = new GameObject("BarraBoost");
+        barraGO.transform.SetParent(canvasT, false);
+        var rt = barraGO.AddComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 0f);
+        rt.anchorMax = new Vector2(0.5f, 0f);
+        rt.anchoredPosition = new Vector2(0f, 40f);
+        rt.sizeDelta = new Vector2(200f, 20f);
+        rt.pivot = new Vector2(0.5f, 0f);
+
+        barraBoost = barraGO.AddComponent<Image>();
+        barraBoost.type = Image.Type.Filled;
+        barraBoost.fillMethod = Image.FillMethod.Horizontal;
+        barraBoost.fillAmount = 1f;
+        barraBoost.color = new Color(1f, 0.843f, 0f, 1f);
+    }
+
+    // Fallback por código: crea 3 segmentos si la escena no los trae.
+    void AsegurarSegmentosBoost()
+    {
+        if (segmentosBoost != null && segmentosBoost.Length > 0) return;
+
+        Transform canvasT = null;
+        if (textoTiempo != null) canvasT = textoTiempo.transform.parent;
+        if (canvasT == null) canvasT = transform.Find("CanvasPersistente");
+        if (canvasT == null) return;
+
+        segmentosBoost = new Image[3];
+        for (int i = 0; i < 3; i++)
+        {
+            var segGO = new GameObject("BoostSeg" + (i + 1));
+            segGO.transform.SetParent(canvasT, false);
+            var rt = segGO.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(0f, 0f);
+            rt.anchoredPosition = new Vector2(20f + i * 30f, 10f);
+            rt.sizeDelta = new Vector2(10f, 20f);
+            rt.pivot = new Vector2(0f, 0f);
+
+            var img = segGO.AddComponent<Image>();
+            img.color = Color.white;
+            img.type = Image.Type.Simple;
+            segmentosBoost[i] = img;
+        }
     }
 
     void ConstruirUIPersistente()
@@ -359,6 +431,43 @@ public class Temporizador : MonoBehaviour
             textoContadorAmigos.text = $"{count}";
         }
 
+        // Barra de boost: se vacía mientras el boost está activo
+        if (barraBoost != null)
+        {
+            var mov = FindFirstObjectByType<Movimiento>();
+            if (mov != null && mov.BoostActivo)
+            {
+                barraBoost.gameObject.SetActive(true);
+                float dur = mov.BoostDuracion > 0f ? mov.BoostDuracion : 1f;
+                barraBoost.fillAmount = Mathf.Clamp01(mov.BoostTiempoRestante / dur);
+            }
+            else
+            {
+                barraBoost.gameObject.SetActive(false);
+            }
+        }
+
+        // Segmentos de boost estilo Subway Surfers
+        if (segmentosBoost != null && segmentosBoost.Length > 0)
+        {
+            var mov = FindFirstObjectByType<Movimiento>();
+            bool activo = (mov != null && mov.BoostActivo);
+            int total = segmentosBoost.Length;
+            int activos = 0;
+            if (activo)
+            {
+                float dur = mov.BoostDuracion > 0f ? mov.BoostDuracion : 1f;
+                float frac = Mathf.Clamp01(mov.BoostTiempoRestante / dur);
+                activos = Mathf.CeilToInt(frac * total);
+                if (activos < 1 && frac > 0f) activos = 1;
+                if (activos > total) activos = total;
+            }
+            for (int i = 0; i < total; i++)
+            {
+                if (segmentosBoost[i] != null)
+                    segmentosBoost[i].gameObject.SetActive(i < activos);
+            }
+        }
         if (tiempoRestante <= 0)
         {
             tiempoRestante = 0;
@@ -375,6 +484,10 @@ public class Temporizador : MonoBehaviour
         if (mov != null) mov.enabled = false; // frena al dino, ya no es Morir()
         if (textoTiempo != null) textoTiempo.gameObject.SetActive(false);
         if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(false);
+        if (barraBoost != null) barraBoost.gameObject.SetActive(false);
+        if (segmentosBoost != null)
+            foreach (var s in segmentosBoost)
+                if (s != null) s.gameObject.SetActive(false);
         if (panelVictoria != null) panelVictoria.SetActive(false);
         if (textoMensaje != null) textoMensaje.text = mensaje;
         if (panelGameOver != null) panelGameOver.SetActive(true);
@@ -402,6 +515,10 @@ public class Temporizador : MonoBehaviour
 
         if (textoTiempo != null) textoTiempo.gameObject.SetActive(false);
         if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(false);
+        if (barraBoost != null) barraBoost.gameObject.SetActive(false);
+        if (segmentosBoost != null)
+            foreach (var s in segmentosBoost)
+                if (s != null) s.gameObject.SetActive(false);
         if (panelGameOver != null) panelGameOver.SetActive(false);
         if (textoVictoria != null)
             textoVictoria.text = $"{mensaje}\nDinos rescatados: {rescatados}\nTiempo: {mu:00}:{su:00}";
@@ -422,9 +539,13 @@ public class Temporizador : MonoBehaviour
         {
             textoTiempo.gameObject.SetActive(true);
             if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(true);
+            if (barraBoost != null) barraBoost.gameObject.SetActive(true);
+            if (segmentosBoost != null)
+                foreach (var s in segmentosBoost)
+                    if (s != null) s.gameObject.SetActive(true);
             int m = Mathf.FloorToInt(tiempoRestante / 60f);
-            int s = Mathf.FloorToInt(tiempoRestante % 60f);
-            textoTiempo.text = $"{m:00}:{s:00}";
+            int sec = Mathf.FloorToInt(tiempoRestante % 60f);
+            textoTiempo.text = $"{m:00}:{sec:00}";
         }
         if (panelGameOver != null) panelGameOver.SetActive(false);
         if (panelVictoria != null) panelVictoria.SetActive(false);

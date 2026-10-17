@@ -27,6 +27,7 @@ public class Movimiento : MonoBehaviour
     private bool vivo = true;
     private float boostMult = 1f;
     private float boostTiempo = 0f;
+    private float boostDuracion = 1f;
     private float inmuneTimer = 0f;
 
     void Start()
@@ -89,10 +90,16 @@ public class Movimiento : MonoBehaviour
 
     public bool EstaEnSuelo() => estaEnSuelo;
 
+    // Exponer estado del boost para la UI
+    public float BoostTiempoRestante => boostTiempo;
+    public bool BoostActivo => boostTiempo > 0f;
+    public float BoostDuracion => boostDuracion;
+
     public void ActivarBoost(float multiplicador, float duracion)
     {
         boostMult = multiplicador;
         boostTiempo = duracion;
+        boostDuracion = duracion;
     }
 
     public bool AgregarSeguidor(DinoSeguidor amigo)

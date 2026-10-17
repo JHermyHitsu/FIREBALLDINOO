@@ -36,15 +36,19 @@
 
 ## 3. Indicador de boost (aura en el dino + barra finita)
 
-**Estado actual:** `ItemComida.cs` activa el boost en `Movimiento` y destruye el item. No hay feedback visual de duración.
+**Estado:** ✅ Implementado (híbrido: jerarquía + fallback por código).
 
-**Cambios a hacer:**
-- [ ] Aura/borde alrededor del dino jugador mientras `boostTiempo > 0` (SpriteRenderer color tint o partículas simples).
-- [ ] Barra horizontal finita (Image con fillAmount) debajo del dino o en el HUD, que se vacíe durante `duracion` segundos.
-- [ ] Al terminar el boost, quitar aura y ocultar la barra (no dejar UI colgando).
-- [ ] (Opcional) Sonido corto al activar y al terminar.
+**Cambios realizados:**
+- [x] Property `BoostTiempoRestante`, `BoostActivo`, `BoostDuracion` en `Movimiento`.
+- [x] `ActivarBoost` guarda la duración.
+- [x] Aura dorada en el SpriteRenderer del dino mientras el boost está activo.
+- [x] GameObject `BarraBoost` en jerarquía asignado en inspector (Filled, Horizontal).
+- [x] Barra se vacía con `fillAmount` cada frame mientras el boost está activo.
+- [x] Se activa/desactiva automáticamente.
+- [x] Fallback por código si la escena no trae el objeto.
+- [x] Se oculta en Game Over/Victoria y se reactiva al reintentar.
 
-**Referencia en código:** `Movimiento.cs` → `ActivarBoost()` y `Update()` (temporizador de boost).
+**Referencia en código:** `Movimiento.cs` → `ActivarBoost()` / `Update()`; `Temporizador.cs` → `Update()` / `AsegurarBarraBoost()`.
 
 ---
 
