@@ -207,9 +207,19 @@ public class TransicionManager : MonoBehaviour
         Rigidbody2D rb = jugadorPersistente.GetComponent<Rigidbody2D>();
         SpriteRenderer sr = jugadorPersistente.GetComponent<SpriteRenderer>();
 
-        // Los dinos reclutados viajan también. Los no reclutados se quedan
-        // (se destruyen con su escena, que es lo correcto).
+        // Los dinos reclutados viajan también respetando su orden en la fila.
         filaViajera.Clear();
+        if (mov != null && mov.seguidores != null)
+        {
+            foreach (DinoSeguidor s in mov.seguidores)
+            {
+                if (s != null && s.reclutado && !filaViajera.Contains(s))
+                {
+                    DontDestroyOnLoad(s.gameObject);
+                    filaViajera.Add(s);
+                }
+            }
+        }
         foreach (DinoSeguidor s in FindObjectsByType<DinoSeguidor>(FindObjectsSortMode.None))
         {
             if (s != null && s.reclutado && !filaViajera.Contains(s))
