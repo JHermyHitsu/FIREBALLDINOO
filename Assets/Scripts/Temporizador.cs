@@ -76,35 +76,10 @@ public class Temporizador : MonoBehaviour
     {
         if (panelGameOver == null || textoMensaje == null || textoTiempo == null)
             ConstruirUIPersistente();
-        else
-            AsegurarContadorAmigos();
         AsegurarPanelVictoria();
     }
 
-    // Crea el contador de amigos si no existe (cubre escenas que traen UI por inspector).
-    void AsegurarContadorAmigos()
-    {
-        if (textoContadorAmigos != null) return;
-
-        Transform canvasT = null;
-        if (textoTiempo != null) canvasT = textoTiempo.transform.parent;
-        if (canvasT == null) canvasT = transform.Find("CanvasPersistente");
-        if (canvasT == null) return;
-
-        var contadorGO = new GameObject("ContadorAmigos");
-        contadorGO.transform.SetParent(canvasT, false);
-        var rtContador = contadorGO.AddComponent<RectTransform>();
-        rtContador.anchorMin = new Vector2(0f, 1f);
-        rtContador.anchorMax = new Vector2(0f, 1f);
-        rtContador.anchoredPosition = new Vector2(20f, -40f);
-        rtContador.sizeDelta = new Vector2(120f, 50f);
-
-        textoContadorAmigos = contadorGO.AddComponent<TextMeshProUGUI>();
-        textoContadorAmigos.alignment = TextAlignmentOptions.Left;
-        textoContadorAmigos.fontSize = 36;
-        textoContadorAmigos.color = Color.white;
-        textoContadorAmigos.text = "🦕 0";
-    }
+    void ConstruirUIPersistente()
     {
         Transform viejo = transform.Find("CanvasPersistente");
         if (viejo != null) Destroy(viejo.gameObject);
