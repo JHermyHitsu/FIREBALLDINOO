@@ -16,6 +16,7 @@ public class Temporizador : MonoBehaviour
     public float tiempoInicial = 180f;
     public float tiempoRestante;
     public TextMeshProUGUI textoTiempo;
+    public TextMeshProUGUI textoContadorAmigos; // contador de amigos (arriba a la izquierda)
     public GameObject panelGameOver; // arrastra PanelGameOver aquí
     public TextMeshProUGUI textoMensaje; // arrastra Texto_TiempoAgotado aquí
     [Header("Victoria (se crea solo si falta)")]
