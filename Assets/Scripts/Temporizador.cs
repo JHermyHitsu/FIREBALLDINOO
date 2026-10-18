@@ -18,6 +18,12 @@ public class Temporizador : MonoBehaviour
     public TextMeshProUGUI textoTiempo;
     public GameObject panelGameOver; // arrastra PanelGameOver aquí
     public TextMeshProUGUI textoMensaje; // arrastra Texto_TiempoAgotado aquí
+    public GameObject imagenTiempoAgotado; // solo se muestra al agotarse el tiempo
+    [Header("Sonido de Perder")]
+    [Tooltip("Sonido o música de Game Over (al caerse o acabarse el tiempo).")]
+    public AudioClip sonidoPerder;
+    private AudioSource audioSource;
+
     [Header("Victoria (se crea solo si falta)")]
     public GameObject panelVictoria;
     public TextMeshProUGUI textoVictoria;
@@ -29,6 +35,10 @@ public class Temporizador : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
         tiempoRestante = tiempoInicial;
+
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
+
         AsegurarUI();
         SceneManager.sceneLoaded += AlCargarEscena;
     }
@@ -46,6 +56,7 @@ public class Temporizador : MonoBehaviour
         {
             if (panelGameOver != null) panelGameOver.SetActive(false);
             if (panelVictoria != null) panelVictoria.SetActive(false);
+            if (imagenTiempoAgotado != null) imagenTiempoAgotado.SetActive(false);
         }
     }
 
@@ -250,6 +261,33 @@ public class Temporizador : MonoBehaviour
         if (panelVictoria != null) panelVictoria.SetActive(false);
         if (textoMensaje != null) textoMensaje.text = mensaje;
         if (panelGameOver != null) panelGameOver.SetActive(true);
+
+        // La imagen de fin apocalíptica solo se enciende si terminó el tiempo (no al caerse/morir)
+        if (imagenTiempoAgotado == null && panelGameOver != null)
+        {
+            Transform t = panelGameOver.transform.Find("Imagen_Tiempo_Agotado");
+            if (t != null) imagenTiempoAgotado = t.gameObject;
+        }
+
+        if (imagenTiempoAgotado != null)
+        {
+            bool esPorTiempo = mensaje == "TIEMPO AGOTADO";
+            imagenTiempoAgotado.SetActive(esPorTiempo);
+        }
+
+        // Frenar música de fondo del nivel para que no se mezcle
+        GameObject musicaFondo = GameObject.Find("Musica_Fondo");
+        if (musicaFondo != null)
+        {
+            AudioSource src = musicaFondo.GetComponent<AudioSource>();
+            if (src != null) src.Stop();
+        }
+
+        // Reproducir sonido/música de perder
+        if (sonidoPerder != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(sonidoPerder);
+        }
     }
 
     // Victoria al llegar a la MetaFinal: congela reloj y dino, muestra stats.
@@ -294,6 +332,8 @@ public class Temporizador : MonoBehaviour
         }
         if (panelGameOver != null) panelGameOver.SetActive(false);
         if (panelVictoria != null) panelVictoria.SetActive(false);
+        if (imagenTiempoAgotado != null) imagenTiempoAgotado.SetActive(false);
+        if (audioSource != null) audioSource.Stop();
         DinoSeguidor.LimpiarHistorial(); // la fila no debe arrastrar posiciones del bioma anterior
         TransicionManager.EnsureExists(); // garantiza el intercambio del jugador al recargar
         SceneManager.LoadScene(EscenaBosque);

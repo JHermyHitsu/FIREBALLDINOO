@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Menu_Inicio.unity
+    path: Assets/Scenes/ESCENA_MENU_INICIO.unity
     guid: adcd5c5fbaecf56be8127d6247766dbb
   - enabled: 1
     path: Assets/Scenes/ESCENA_BIOMA_BOSQUE.unity
