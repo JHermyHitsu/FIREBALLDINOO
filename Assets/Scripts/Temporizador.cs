@@ -159,6 +159,7 @@ public class Temporizador : MonoBehaviour
         AsegurarSegmentosBoost();
         AsegurarPanelVictoria();
         AsegurarHoverBotones(panelPerder);
+        AsegurarHoverBotones(panelGameOver);
     }
 
     // Fallback por código: crea el contador si la escena no lo trae.
@@ -590,6 +591,7 @@ public class Temporizador : MonoBehaviour
         else if (panelGameOver != null)
         {
             if (panelPerder != null) panelPerder.SetActive(false);
+            AsegurarHoverBotones(panelGameOver);
             panelGameOver.SetActive(true);
             if (imagenTiempoAgotado != null) imagenTiempoAgotado.SetActive(true);
         }
