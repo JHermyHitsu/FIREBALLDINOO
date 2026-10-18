@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: b305297398bdb900693d414340288c68
+guid: 4e93f1a2ceb63bf0eb418d0e9549bf42
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1038132130251816902
-    second: IMPACTO_0
+      213: -2758781804060269756
+    second: CONTINUAR_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: IMPACTO_0
+      name: CONTINUAR_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1256
-        height: 832
+        width: 1776
+        height: 608
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a30cb6ae350d791f0800000000000000
-      internalID: -1038132130251816902
+      spriteID: 4432d2cd096d6b9d0800000000000000
+      internalID: -2758781804060269756
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      IMPACTO_0: -1038132130251816902
+      CONTINUAR_0: -2758781804060269756
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
