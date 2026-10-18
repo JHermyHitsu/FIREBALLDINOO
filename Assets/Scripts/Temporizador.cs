@@ -77,21 +77,83 @@ public class Temporizador : MonoBehaviour
         if (!terminado)
         {
             if (panelGameOver != null) panelGameOver.SetActive(false);
+            if (panelPerder != null) panelPerder.SetActive(false);
             if (panelVictoria != null) panelVictoria.SetActive(false);
             if (imagenTiempoAgotado != null) imagenTiempoAgotado.SetActive(false);
         }
 
-        // Buscar PanelVictoria en la escena nueva (prioridad sobre el persistente)
+        // Reasignar PanelVictoria en la escena nueva (prioridad sobre el persistente)
         GameObject pvEscena = BuscarPanelVictoriaEnEscena();
         if (pvEscena != null && pvEscena != panelVictoria)
         {
-            // Desactivar el persistente si existe
             if (panelVictoria != null) panelVictoria.SetActive(false);
             panelVictoria = pvEscena;
-            // Buscar TextoVictoria en el panel de la escena (opcional; el panel puede usar imagen)
             Transform t = panelVictoria.transform.Find("TextoVictoria");
             if (t != null) textoVictoria = t.GetComponent<TMPro.TextMeshProUGUI>();
         }
+
+        // Reasignar PanelGameOver y PanelPerder de la escena nueva.
+        // El Temporizador es persistente (DontDestroyOnLoad): los paneles de la
+        // escena anterior se destruyeron, así que hay que tomar los de la nueva.
+        foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects())
+        {
+            var pg = BuscarHijoRecursivo(root, "PanelGameOver");
+            if (pg != null && pg != panelGameOver)
+            {
+                if (panelGameOver != null) panelGameOver.SetActive(false);
+                panelGameOver = pg;
+            }
+            var pp = BuscarHijoRecursivo(root, "PanelPerder");
+            if (pp != null && pp != panelPerder)
+            {
+                if (panelPerder != null) panelPerder.SetActive(false);
+                panelPerder = pp;
+            }
+        }
+
+        // Reconectar los botones Reintentar/Salir de los paneles de la escena nueva
+        // al Temporizador persistente (el de la escena se destruyó).
+        ReconectarBotonesPaneles();
+
+        // Reasignar textoTiempo / textoContadorAmigos si se perdieron (fallback).
+        if (textoTiempo == null)
+        {
+            foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects())
+            {
+                var tt = BuscarHijoRecursivo(root, "TextoTiempo");
+                if (tt != null) { textoTiempo = tt.GetComponent<TMPro.TextMeshProUGUI>(); break; }
+            }
+        }
+        if (textoContadorAmigos == null)
+        {
+            foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects())
+            {
+                var tc = BuscarHijoRecursivo(root, "TextoContadorAmigos");
+                if (tc != null) { textoContadorAmigos = tc.GetComponent<TMPro.TextMeshProUGUI>(); break; }
+            }
+        }
+    }
+
+    // Reconecta los botones de los paneles de Game Over / Perder al Temporizador persistente.
+    void ReconectarBotonesPaneles()
+    {
+        ReconectarBotonEnPanel(panelGameOver, "BotonReintentar", Reintentar);
+        ReconectarBotonEnPanel(panelGameOver, "BotonSalir", Salir);
+        ReconectarBotonEnPanel(panelPerder, "BotonReintentar", Reintentar);
+        ReconectarBotonEnPanel(panelPerder, "BotonSalir", Salir);
+        AsegurarHoverBotones(panelGameOver);
+        AsegurarHoverBotones(panelPerder);
+    }
+
+    void ReconectarBotonEnPanel(GameObject panel, string nombreBoton, UnityEngine.Events.UnityAction accion)
+    {
+        if (panel == null) return;
+        var btnGO = BuscarHijoRecursivo(panel, nombreBoton);
+        if (btnGO == null) return;
+        var btn = btnGO.GetComponent<Button>();
+        if (btn == null) return;
+        btn.onClick.RemoveAllListeners();
+        btn.onClick.AddListener(accion);
     }
 
     // Devuelve el Temporizador persistente; lo crea (con UI mínima por código)
