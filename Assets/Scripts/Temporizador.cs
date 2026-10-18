@@ -20,6 +20,7 @@ public class Temporizador : MonoBehaviour
     public Image barraBoost; // barra de boost (abajo al centro)
     public Image[] segmentosBoost; // segmentos de boost estilo Subway Surfers
     public GameObject panelGameOver; // arrastra PanelGameOver aquí
+    public GameObject panelPerder;   // arrastra PanelPerder aquí (todos caídos)
 
     // Estado del contador de amigos
     int ultimoCountAmigos = 0;
@@ -87,7 +88,7 @@ public class Temporizador : MonoBehaviour
     // Si las referencias del inspector se perdieron, construye una UI persistente por código.
     public void AsegurarUI()
     {
-        if (panelGameOver == null || textoMensaje == null || textoTiempo == null)
+        if (panelGameOver == null || textoTiempo == null)
             ConstruirUIPersistente();
         AsegurarContadorAmigos();
         AsegurarSegmentosBoost();
@@ -439,6 +440,16 @@ public class Temporizador : MonoBehaviour
                     segmentosBoost[i].gameObject.SetActive(i < activos);
             }
         }
+        // Temblor de cámara cuando el tiempo está bajo (8s o menos)
+        var cam = FindFirstObjectByType<Camara>();
+        if (cam != null)
+        {
+            if (tiempoRestante <= 16f && tiempoRestante > 0f)
+                cam.ActivarTemblor(true, 1.2f);
+            else
+                cam.ActivarTemblor(false, 0f);
+        }
+
         if (tiempoRestante <= 0)
         {
             tiempoRestante = 0;
@@ -447,7 +458,7 @@ public class Temporizador : MonoBehaviour
         }
     }
 
-    public void MostrarGameOver()
+    public void MostrarGameOver(bool todosCaidos = false)
     {
         AsegurarUI();
         terminado = true;
@@ -460,34 +471,21 @@ public class Temporizador : MonoBehaviour
             foreach (var s in segmentosBoost)
                 if (s != null) s.gameObject.SetActive(false);
         if (panelVictoria != null) panelVictoria.SetActive(false);
-        // No sobrescribir el texto: se respeta lo configurado en el inspector.
-        if (panelGameOver != null) panelGameOver.SetActive(true);
+        var camGO = FindFirstObjectByType<Camara>();
+        if (camGO != null) camGO.ActivarTemblor(false, 0f);
 
-        // La imagen de fin apocalíptica solo se enciende si terminó el tiempo (no al caerse/morir)
-        if (imagenTiempoAgotado == null && panelGameOver != null)
+        // Activar el panel correspondiente según la causa
+        if (todosCaidos && panelPerder != null)
         {
-            Transform t = panelGameOver.transform.Find("Imagen_Tiempo_Agotado");
-            if (t != null) imagenTiempoAgotado = t.gameObject;
+            if (panelGameOver != null) panelGameOver.SetActive(false);
+            panelPerder.SetActive(true);
+            if (imagenTiempoAgotado != null) imagenTiempoAgotado.SetActive(false);
         }
-
-        if (imagenTiempoAgotado != null)
+        else if (panelGameOver != null)
         {
-            bool esPorTiempo = textoMensaje != null && textoMensaje.text == "TIEMPO AGOTADO";
-            imagenTiempoAgotado.SetActive(esPorTiempo);
-        }
-
-        // Frenar música de fondo del nivel para que no se mezcle
-        GameObject musicaFondo = GameObject.Find("Musica_Fondo");
-        if (musicaFondo != null)
-        {
-            AudioSource src = musicaFondo.GetComponent<AudioSource>();
-            if (src != null) src.Stop();
-        }
-
-        // Reproducir sonido/música de perder
-        if (sonidoPerder != null && audioSource != null)
-        {
-            audioSource.PlayOneShot(sonidoPerder);
+            if (panelPerder != null) panelPerder.SetActive(false);
+            panelGameOver.SetActive(true);
+            if (imagenTiempoAgotado != null) imagenTiempoAgotado.SetActive(true);
         }
     }
 
@@ -547,6 +545,8 @@ public class Temporizador : MonoBehaviour
         }
         if (panelGameOver != null) panelGameOver.SetActive(false);
         if (panelVictoria != null) panelVictoria.SetActive(false);
+        var camGO = FindFirstObjectByType<Camara>();
+        if (camGO != null) camGO.ActivarTemblor(false, 0f);
         if (imagenTiempoAgotado != null) imagenTiempoAgotado.SetActive(false);
         if (audioSource != null) audioSource.Stop();
         DinoSeguidor.LimpiarHistorial(); // la fila no debe arrastrar posiciones del bioma anterior

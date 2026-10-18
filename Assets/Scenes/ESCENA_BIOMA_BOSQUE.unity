@@ -740,7 +740,8 @@ MonoBehaviour:
   - {fileID: 1074136504}
   - {fileID: 1483007412}
   - {fileID: 701688656}
-  panelGameOver: {fileID: 58371157}
+  panelGameOver: {fileID: 1100136115}
+  panelPerder: {fileID: 58371157}
   textoMensaje: {fileID: 0}
   imagenTiempoAgotado: {fileID: 0}
   sonidoPerder: {fileID: 8300000, guid: 33c0c5d3f51e013188d65a3970b1d20e, type: 3}

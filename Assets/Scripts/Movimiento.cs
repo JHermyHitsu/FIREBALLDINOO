@@ -170,7 +170,7 @@ public class Movimiento : MonoBehaviour
     {
         // El Temporizador es persistente; EnsureExists cubre el Play directo
         // en Desierto/Cueva. Reintentar vuelve siempre a Bosque.
-        Temporizador.EnsureExists().MostrarGameOver();
+        Temporizador.EnsureExists().MostrarGameOver(todosCaidos: true);
     }
 
     private void ReiniciarNivel()
