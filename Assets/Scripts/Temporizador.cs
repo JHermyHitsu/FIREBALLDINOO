@@ -51,6 +51,17 @@ public class Temporizador : MonoBehaviour
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
         AsegurarUI();
+        // Los segmentos de boost solo se muestran cuando el boost está activo
+        if (segmentosBoost != null)
+        {
+            foreach (var s in segmentosBoost)
+                if (s != null) s.gameObject.SetActive(false);
+            if (segmentosBoost.Length > 0 && segmentosBoost[0] != null)
+            {
+                Transform padre = segmentosBoost[0].transform.parent;
+                if (padre != null) padre.gameObject.SetActive(false);
+            }
+        }
         SceneManager.sceneLoaded += AlCargarEscena;
     }
 
@@ -214,6 +225,7 @@ public class Temporizador : MonoBehaviour
             img.color = Color.white;
             img.type = Image.Type.Simple;
             segmentosBoost[i] = img;
+            segGO.SetActive(false);
         }
     }
 
@@ -503,6 +515,12 @@ public class Temporizador : MonoBehaviour
                 if (segmentosBoost[i] != null)
                     segmentosBoost[i].gameObject.SetActive(i < activos);
             }
+            // Activar/desactivar el contenedor (padre) según si hay boost
+            if (segmentosBoost[0] != null)
+            {
+                Transform padre = segmentosBoost[0].transform.parent;
+                if (padre != null) padre.gameObject.SetActive(activos > 0);
+            }
         }
         // Temblor de cámara cuando el tiempo está bajo (8s o menos)
         var cam = FindFirstObjectByType<Camara>();
@@ -606,8 +624,15 @@ public class Temporizador : MonoBehaviour
             if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(true);
             if (barraBoost != null) barraBoost.gameObject.SetActive(true);
             if (segmentosBoost != null)
+            {
                 foreach (var s in segmentosBoost)
-                    if (s != null) s.gameObject.SetActive(true);
+                    if (s != null) s.gameObject.SetActive(false);
+                if (segmentosBoost.Length > 0 && segmentosBoost[0] != null)
+                {
+                    Transform padre = segmentosBoost[0].transform.parent;
+                    if (padre != null) padre.gameObject.SetActive(false);
+                }
+            }
             int m = Mathf.FloorToInt(tiempoRestante / 60f);
             int sec = Mathf.FloorToInt(tiempoRestante % 60f);
             textoTiempo.text = $"{m:00}:{sec:00}";
