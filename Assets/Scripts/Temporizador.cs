@@ -158,6 +158,7 @@ public class Temporizador : MonoBehaviour
         AsegurarContadorAmigos();
         AsegurarSegmentosBoost();
         AsegurarPanelVictoria();
+        AsegurarHoverBotones(panelPerder);
     }
 
     // Fallback por código: crea el contador si la escena no lo trae.
@@ -334,6 +335,17 @@ public class Temporizador : MonoBehaviour
         if (canvasT == null) return; // sin canvas no hay dónde construir
         if (panelVictoria != null) Destroy(panelVictoria);
         ConstruirPanelVictoria(canvasT);
+    }
+
+    // Asegura que los botones del panel tengan el efecto hover simple.
+    void AsegurarHoverBotones(GameObject panel)
+    {
+        if (panel == null) return;
+        foreach (var btn in panel.GetComponentsInChildren<Button>(true))
+        {
+            if (btn.GetComponent<HoverBoton>() == null)
+                btn.gameObject.AddComponent<HoverBoton>();
+        }
     }
 
     void ConstruirPanelVictoria(Transform canvasT)
@@ -548,18 +560,30 @@ public class Temporizador : MonoBehaviour
         if (mov != null) mov.enabled = false; // frena al dino, ya no es Morir()
         if (textoTiempo != null) textoTiempo.gameObject.SetActive(false);
         if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(false);
-        if (barraBoost != null) barraBoost.gameObject.SetActive(false);
-        if (segmentosBoost != null)
-            foreach (var s in segmentosBoost)
-                if (s != null) s.gameObject.SetActive(false);
         if (panelVictoria != null) panelVictoria.SetActive(false);
         var camGO = FindFirstObjectByType<Camara>();
         if (camGO != null) camGO.ActivarTemblor(false, 0f);
+
+        // Apagar boost (segmentos + contenedor + estado logico) al morir
+        if (barraBoost != null) barraBoost.gameObject.SetActive(false);
+        if (segmentosBoost != null)
+        {
+            foreach (var s in segmentosBoost)
+                if (s != null) s.gameObject.SetActive(false);
+            if (segmentosBoost.Length > 0 && segmentosBoost[0] != null)
+            {
+                Transform padre = segmentosBoost[0].transform.parent;
+                if (padre != null) padre.gameObject.SetActive(false);
+            }
+        }
+        var movMuerte = FindFirstObjectByType<Movimiento>();
+        if (movMuerte != null) movMuerte.ResetearBoost();
 
         // Activar el panel correspondiente según la causa
         if (todosCaidos && panelPerder != null)
         {
             if (panelGameOver != null) panelGameOver.SetActive(false);
+            AsegurarHoverBotones(panelPerder);
             panelPerder.SetActive(true);
             if (imagenTiempoAgotado != null) imagenTiempoAgotado.SetActive(false);
         }
@@ -585,8 +609,16 @@ public class Temporizador : MonoBehaviour
         if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(false);
         if (barraBoost != null) barraBoost.gameObject.SetActive(false);
         if (segmentosBoost != null)
+        {
             foreach (var s in segmentosBoost)
                 if (s != null) s.gameObject.SetActive(false);
+            if (segmentosBoost.Length > 0 && segmentosBoost[0] != null)
+            {
+                Transform padre = segmentosBoost[0].transform.parent;
+                if (padre != null) padre.gameObject.SetActive(false);
+            }
+        }
+        if (mov != null) mov.ResetearBoost();
         if (panelGameOver != null) panelGameOver.SetActive(false);
         if (panelPerder != null) panelPerder.SetActive(false);
 
@@ -643,6 +675,8 @@ public class Temporizador : MonoBehaviour
         if (camGO != null) camGO.ActivarTemblor(false, 0f);
         if (imagenTiempoAgotado != null) imagenTiempoAgotado.SetActive(false);
         if (audioSource != null) audioSource.Stop();
+        var movReintentar = FindFirstObjectByType<Movimiento>();
+        if (movReintentar != null) movReintentar.ResetearBoost();
         DinoSeguidor.LimpiarHistorial(); // la fila no debe arrastrar posiciones del bioma anterior
         TransicionManager.EnsureExists(); // garantiza el intercambio del jugador al recargar
         SceneManager.LoadScene(EscenaBosque);

@@ -103,6 +103,14 @@ public class Movimiento : MonoBehaviour
         boostDuracion = duracion;
     }
 
+    // Resetea el boost (usado al morir / reintentar) para que no quede activo.
+    public void ResetearBoost()
+    {
+        boostMult = 1f;
+        boostTiempo = 0f;
+        boostDuracion = 1f;
+    }
+
     public bool AgregarSeguidor(DinoSeguidor amigo)
     {
         if (seguidores.Count >= maxSeguidores) return false;
