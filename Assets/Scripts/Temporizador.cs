@@ -69,6 +69,18 @@ public class Temporizador : MonoBehaviour
             if (panelVictoria != null) panelVictoria.SetActive(false);
             if (imagenTiempoAgotado != null) imagenTiempoAgotado.SetActive(false);
         }
+
+        // Buscar PanelVictoria en la escena nueva (prioridad sobre el persistente)
+        GameObject pvEscena = BuscarPanelVictoriaEnEscena();
+        if (pvEscena != null && pvEscena != panelVictoria)
+        {
+            // Desactivar el persistente si existe
+            if (panelVictoria != null) panelVictoria.SetActive(false);
+            panelVictoria = pvEscena;
+            // Buscar TextoVictoria en el panel de la escena (opcional; el panel puede usar imagen)
+            Transform t = panelVictoria.transform.Find("TextoVictoria");
+            if (t != null) textoVictoria = t.GetComponent<TMPro.TextMeshProUGUI>();
+        }
     }
 
     // Devuelve el Temporizador persistente; lo crea (con UI mínima por código)
@@ -86,10 +98,52 @@ public class Temporizador : MonoBehaviour
     }
 
     // Si las referencias del inspector se perdieron, construye una UI persistente por código.
+    // Busca un hijo por nombre recursivamente en la jerarquia
+    GameObject BuscarHijoRecursivo(GameObject obj, string nombre)
+    {
+        if (obj == null) return null;
+        if (obj.name == nombre) return obj;
+        foreach (Transform child in obj.transform)
+        {
+            var found = BuscarHijoRecursivo(child.gameObject, nombre);
+            if (found != null) return found;
+        }
+        return null;
+    }
+
+    // Busca el PanelVictoria de la escena activa, incluyendo GameObjects inactivos.
+    // GameObject.Find() NO encuentra objetos inactivos, por eso se recorre la jerarquia.
+    GameObject BuscarPanelVictoriaEnEscena()
+    {
+        foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects())
+        {
+            var pv = BuscarHijoRecursivo(root, "PanelVictoria");
+            if (pv != null) return pv;
+        }
+        return null;
+    }
+
+    // Activa todos los ancestros (Canvas, etc.) para que un panel pueda renderizarse.
+    void ActivarAncestros(GameObject go)
+    {
+        if (go == null) return;
+        Transform t = go.transform.parent;
+        while (t != null)
+        {
+            if (!t.gameObject.activeSelf) t.gameObject.SetActive(true);
+            t = t.parent;
+        }
+    }
+
     public void AsegurarUI()
     {
         if (panelGameOver == null || textoTiempo == null)
             ConstruirUIPersistente();
+        if (panelVictoria == null)
+        {
+            var pv = BuscarPanelVictoriaEnEscena();
+            if (pv != null) panelVictoria = pv;
+        }
         AsegurarContadorAmigos();
         AsegurarSegmentosBoost();
         AsegurarPanelVictoria();
@@ -254,6 +308,16 @@ public class Temporizador : MonoBehaviour
     void AsegurarPanelVictoria()
     {
         if (panelVictoria != null && textoVictoria != null) return;
+        // Si el panel se encontró en la escena, no destruir ni recrear
+        if (panelVictoria != null)
+        {
+            if (textoVictoria == null)
+            {
+                Transform t = panelVictoria.transform.Find("TextoVictoria");
+                if (t != null) textoVictoria = t.GetComponent<TMPro.TextMeshProUGUI>();
+            }
+            return;
+        }
         Transform canvasT = ObtenerCanvas();
         if (canvasT == null) return; // sin canvas no hay dónde construir
         if (panelVictoria != null) Destroy(panelVictoria);
@@ -496,18 +560,8 @@ public class Temporizador : MonoBehaviour
         AsegurarUI();
         terminado = true;
 
-        int rescatados = 0;
         var mov = FindFirstObjectByType<Movimiento>();
-        if (mov != null)
-        {
-            mov.enabled = false;
-            foreach (var s in mov.seguidores)
-                if (s != null) rescatados++;
-        }
-
-        float usado = Mathf.Max(0f, tiempoInicial - tiempoRestante);
-        int mu = Mathf.FloorToInt(usado / 60f);
-        int su = Mathf.FloorToInt(usado % 60f);
+        if (mov != null) mov.enabled = false;
 
         if (textoTiempo != null) textoTiempo.gameObject.SetActive(false);
         if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(false);
@@ -516,9 +570,24 @@ public class Temporizador : MonoBehaviour
             foreach (var s in segmentosBoost)
                 if (s != null) s.gameObject.SetActive(false);
         if (panelGameOver != null) panelGameOver.SetActive(false);
-        if (textoVictoria != null)
-            textoVictoria.text = $"{mensaje}\nDinos rescatados: {rescatados}\nTiempo: {mu:00}:{su:00}";
-        if (panelVictoria != null) panelVictoria.SetActive(true);
+        if (panelPerder != null) panelPerder.SetActive(false);
+
+        // Preferir el PanelVictoria de la escena (jerarquia) sobre el persistente.
+        // Activar tambien sus ancestros (Canvas) porque en la escena suelen estar inactivos.
+        var pvEscena = BuscarPanelVictoriaEnEscena();
+        if (pvEscena != null)
+        {
+            if (panelVictoria != null && panelVictoria != pvEscena)
+                panelVictoria.SetActive(false);
+            panelVictoria = pvEscena;
+            Transform t = panelVictoria.transform.Find("TextoVictoria");
+            if (t != null) textoVictoria = t.GetComponent<TMPro.TextMeshProUGUI>();
+        }
+        if (panelVictoria != null)
+        {
+            ActivarAncestros(panelVictoria);
+            panelVictoria.SetActive(true);
+        }
     }
 
     public void AgregarTiempo(float seg) { if(!terminado) tiempoRestante += seg; }
