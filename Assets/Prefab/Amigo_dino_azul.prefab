@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3419324360772659660}
   - component: {fileID: 816422342947501148}
+  - component: {fileID: 5088174688232166875}
   - component: {fileID: 3088174688232166874}
   - component: {fileID: 5731895711176291454}
   - component: {fileID: 4260903305488860864}
@@ -29,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 9112554365290563677}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6.05, y: -0.56, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 13, y: 13, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -82,7 +83,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 3
+  m_SortingOrder: 4
   m_MaskInteraction: 0
   m_Sprite: {fileID: -1193820911090328509, guid: 06dd77288b4c913ee9d2bbb41bbc8892, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -94,6 +95,33 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!50 &5088174688232166875
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9112554365290563677}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 1
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
 --- !u!70 &3088174688232166874
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -128,8 +156,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.0035049366, y: 0.095088296}
-  m_Size: {x: 0.1464155, y: 0.17574356}
+  m_Offset: {x: 0, y: 0.095}
+  m_Size: {x: 0.15, y: 0.175}
   m_Direction: 0
 --- !u!95 &5731895711176291454
 Animator:
@@ -166,7 +194,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DinoSeguidor
   distanciaDetras: 0.75
-  suavizadoHorizontal: 12
+  suavizadoHorizontal: 14
   offsetVertical: 0
   reclutado: 0
-  pasosSeparacion: 9
+  pasosSeparacion: 8
+  sonidoMuerte: {fileID: 8300000, guid: ad48f6502af01f21dafa058c0d4b0179, type: 3}

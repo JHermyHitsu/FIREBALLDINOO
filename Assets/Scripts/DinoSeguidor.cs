@@ -1,43 +1,43 @@
 using UnityEngine;
-using System.Collections.Generic;
 
+[DisallowMultipleComponent]
+[RequireComponent(typeof(SpriteRenderer), typeof(Collider2D), typeof(Animator))]
 public class DinoSeguidor : MonoBehaviour
 {
-    [Header("Ajustes de Seguimiento")]
+    [Header("Ajustes de Seguimiento Simple")]
+    [Tooltip("Distancia entre cada dinosaurio de la fila.")]
     public float distanciaDetras = 0.75f;
+    [Tooltip("Rapidez con la que sigue al de adelante (mayor = más rápido).")]
     public float suavizadoHorizontal = 12f;
+    [Tooltip("Ajuste de altura opcional respecto al jugador.")]
     public float offsetVertical = 0f;
+
+    [Header("Sonido")]
+    [Tooltip("Efecto de sonido al morir o ser sacrificado.")]
+    public AudioClip sonidoMuerte;
 
     [Header("Estado")]
     public bool reclutado = false;
 
-    [Header("Separación en fila")]
-    public int pasosSeparacion = 9;
+    // Mantenido para compatibilidad con el Inspector del Prefab
+    [HideInInspector] public int pasosSeparacion = 8;
 
     private Movimiento lider;
+    private SpriteRenderer srLider;
     private Collider2D col;
     private SpriteRenderer sr;
     private Animator animator;
     private Rigidbody2D rb;
-    private SpriteRenderer srLider;
-    private int indiceFila = 0;
 
+    private int indiceFila = 0;
     private bool cayendo = false;
     private float velocidadX = 0f;
     private float velocidadY = 0f;
 
-    // ── Historial continuo del líder (compartido y actualizado 1 sola vez por frame) ──
-    private struct MuestraLider
-    {
-        public Vector3 posicion;
-        public bool enSuelo;
-        public float tiempo;
-    }
-
-    private static readonly List<MuestraLider> historial = new List<MuestraLider>();
-    private static Transform ultimoLiderRegistrado;
-    private static int ultimoFrameRegistrado = -1;
-    private const float DuracionMaxHistorial = 4f;
+    private static readonly int HashVelocidad = Animator.StringToHash("Velocidad");
+    private static readonly int HashEnSuelo = Animator.StringToHash("EnSuelo");
+    private static readonly int HashMuerto = Animator.StringToHash("Muerto");
+    private static readonly int HashMorir = Animator.StringToHash("Morir");
 
     void Awake()
     {
@@ -46,12 +46,17 @@ public class DinoSeguidor : MonoBehaviour
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
 
-        // Corrige escala Z en 0 si algún prefab o instancia la tenía mal configurada
         if (Mathf.Approximately(transform.localScale.z, 0f))
         {
             Vector3 s = transform.localScale;
             s.z = 1f;
             transform.localScale = s;
+        }
+
+        if (rb != null)
+        {
+            rb.bodyType = RigidbodyType2D.Kinematic;
+            rb.gravityScale = 0f;
         }
     }
 
@@ -59,8 +64,8 @@ public class DinoSeguidor : MonoBehaviour
     {
         if (animator != null)
         {
-            animator.SetBool("EnSuelo", true);
-            animator.SetFloat("Velocidad", 0f);
+            animator.SetBool(HashEnSuelo, true);
+            animator.SetFloat(HashVelocidad, 0f);
         }
     }
 
@@ -89,40 +94,21 @@ public class DinoSeguidor : MonoBehaviour
         if (rb != null)
         {
             rb.bodyType = RigidbodyType2D.Kinematic;
+            rb.gravityScale = 0f;
             rb.linearVelocity = Vector2.zero;
-        }
-
-        if (historial.Count == 0 || ultimoLiderRegistrado != lider.transform)
-        {
-            ultimoLiderRegistrado = lider.transform;
-            InicializarHistorial(lider.transform.position, lider.EstaEnSuelo());
         }
     }
 
-    /// <summary>
-    /// Re-vincula este seguidor después de una transición de escena.
-    /// </summary>
-    public void ReVincular(Movimiento jugador)
+    public void ReVincular(Movimiento jugador) => Reclutar(jugador);
+
+    public void AsignarIndice(int indice)
     {
-        if (cayendo || jugador == null) return;
-
-        reclutado = true;
-        lider = jugador;
-        srLider = lider.GetComponent<SpriteRenderer>();
-        velocidadX = 0f;
-        velocidadY = 0f;
-
-        if (col != null) col.enabled = false;
-        if (rb != null)
-        {
-            rb.bodyType = RigidbodyType2D.Kinematic;
-            rb.linearVelocity = Vector2.zero;
-        }
+        indiceFila = Mathf.Max(0, indice);
+        if (sr != null && srLider != null)
+            sr.sortingOrder = Mathf.Max(1, srLider.sortingOrder - 1 - indiceFila);
     }
 
-    public void AsignarIndice(int indice) => indiceFila = indice;
-
-    void Update()
+    void LateUpdate()
     {
         if (cayendo)
         {
@@ -133,65 +119,30 @@ public class DinoSeguidor : MonoBehaviour
 
         if (!reclutado || lider == null) return;
 
-        RegistrarMuestraLider();
-    }
-
-    void LateUpdate()
-    {
-        if (cayendo || !reclutado || lider == null) return;
-        if (historial.Count == 0)
+        // 1. Seguir en cadena: el primero sigue al jugador; los demás siguen al dino de adelante
+        Transform objetivo = lider.transform;
+        if (indiceFila > 0 && indiceFila - 1 < lider.seguidores.Count)
         {
-            RegistrarMuestraLider();
-            if (historial.Count == 0) return;
+            DinoSeguidor anterior = lider.seguidores[indiceFila - 1];
+            if (anterior != null && anterior != this && anterior.reclutado)
+                objetivo = anterior.transform;
         }
 
-        // 1. Obtener posición e información de salto con retraso interpolado por seguidor
-        float retrasoPorSeguidor = Mathf.Max(0.08f, pasosSeparacion * 0.018f) * (indiceFila + 1);
-        MuestraLider muestra = ObtenerMuestraInterpolada(Time.time - retrasoPorSeguidor);
+        // 2. Calcular el punto justo detrás del objetivo actual
+        float ladoDetras = (srLider != null && srLider.flipX) ? 1f : -1f;
+        float destinoX = objetivo.position.x + (ladoDetras * distanciaDetras);
+        float destinoY = objetivo.position.y + (objetivo == lider.transform ? offsetVertical : 0f);
 
-        Vector3 posObjetivo = muestra.posicion;
-        float xLider = lider.transform.position.x;
-        float sepDeseada = Mathf.Max(0.4f, distanciaDetras) * (indiceFila + 1);
+        // 3. Moverse suavemente hacia ese punto (crea el efecto ola en cadena de forma natural)
+        float tiempoSuaveX = 1f / Mathf.Max(1f, suavizadoHorizontal);
+        float tiempoSuaveY = 0.055f;
 
-        // 2. Determinar el lado natural en el que se encuentra el seguidor respecto al líder.
-        //    No se fuerza un cambio de lado solo por girar (flipX), evitando tirones y caídas en esquinas.
-        float diffX = transform.position.x - xLider;
-        float ladoActual;
-        if (Mathf.Abs(diffX) > 0.05f)
-            ladoActual = Mathf.Sign(diffX);
-        else
-            ladoActual = (srLider != null && srLider.flipX) ? 1f : -1f;
+        float nuevoX = Mathf.SmoothDamp(transform.position.x, destinoX, ref velocidadX, tiempoSuaveX);
+        float nuevoY = Mathf.SmoothDamp(transform.position.y, destinoY, ref velocidadY, tiempoSuaveY);
 
-        // 3. Mantener distancia cómoda detrás del líder sin encimarse cuando el líder se detiene
-        if (Mathf.Abs(posObjetivo.x - xLider) < sepDeseada)
-        {
-            posObjetivo.x = xLider + ladoActual * sepDeseada;
-        }
+        transform.position = new Vector3(nuevoX, nuevoY, transform.position.z);
 
-        // 4. Protección inteligente en esquinas/bordes de plataformas:
-        //    Si el líder está en el suelo pero la posición de descanso del seguidor queda
-        //    asomada al vacío en una esquina, acercamos suavemente al seguidor hacia el líder
-        //    para que se mantenga firme sobre la plataforma (nunca muere en esquinas).
-        if (lider.EstaEnSuelo() && muestra.enSuelo)
-        {
-            posObjetivo.y = lider.transform.position.y;
-            if (!HaySueloDebajoDe(new Vector2(posObjetivo.x, posObjetivo.y)))
-            {
-                float sepSegura = Mathf.Min(sepDeseada, 0.22f * (indiceFila + 1));
-                posObjetivo.x = xLider + ladoActual * sepSegura;
-            }
-        }
-
-        // 5. Movimiento orgánico con SmoothDamp (aceleración y frenado suaves, sin vibración)
-        float tiempoSuavizadoX = Mathf.Clamp(1.4f / Mathf.Max(1f, suavizadoHorizontal), 0.05f, 0.25f);
-        float tiempoSuavizadoY = muestra.enSuelo ? 0.06f : 0.035f;
-
-        float newX = Mathf.SmoothDamp(transform.position.x, posObjetivo.x, ref velocidadX, tiempoSuavizadoX);
-        float newY = Mathf.SmoothDamp(transform.position.y, posObjetivo.y + offsetVertical, ref velocidadY, tiempoSuavizadoY);
-
-        transform.position = new Vector3(newX, newY, transform.position.z);
-
-        // 6. Orientación natural: mira hacia donde camina; al detenerse, mira como el líder
+        // 4. Mirar hacia donde camina; al frenar, mirar igual que el líder
         if (sr != null)
         {
             if (Mathf.Abs(velocidadX) > 0.25f)
@@ -200,37 +151,21 @@ public class DinoSeguidor : MonoBehaviour
                 sr.flipX = srLider.flipX;
         }
 
-        // 7. Animación sincronizada con la velocidad y salto reales del seguidor
+        // 5. Animación simple de caminar y correr (con boost de carne)
         if (animator != null)
         {
             bool enMovimiento = Mathf.Abs(velocidadX) > 0.2f;
-            animator.SetFloat("Velocidad", enMovimiento ? 1f : 0f);
-            animator.SetBool("EnSuelo", muestra.enSuelo);
+            float valorVelocidad = 0f;
+            if (enMovimiento)
+            {
+                valorVelocidad = (lider != null && lider.TieneBoost()) ? 1.5f : 1f;
+            }
+            bool enSuelo = Mathf.Abs(velocidadY) < 1.2f && lider.EstaEnSuelo();
+
+            animator.SetFloat(HashVelocidad, valorVelocidad);
+            animator.SetBool(HashEnSuelo, enSuelo);
         }
     }
-
-    // ────────────────────────────────────────────────────────────
-    //  Detección auxiliar de borde (solo para acomodar en esquinas)
-    // ────────────────────────────────────────────────────────────
-
-    private bool HaySueloDebajoDe(Vector2 punto)
-    {
-        Vector2 origen = punto + Vector2.up * 0.25f;
-        RaycastHit2D[] hits = Physics2D.RaycastAll(origen, Vector2.down, 1.2f);
-        foreach (var hit in hits)
-        {
-            if (hit.collider == null || hit.collider.isTrigger) continue;
-            if (hit.collider.gameObject == gameObject) continue;
-            if (hit.collider.CompareTag("Player")) continue;
-            if (hit.collider.GetComponent<DinoSeguidor>() != null) continue;
-            return true;
-        }
-        return false;
-    }
-
-    // ────────────────────────────────────────────────────────────
-    //  Sacrificio (cuando el jugador recibe daño o cae al vacío)
-    // ────────────────────────────────────────────────────────────
 
     public void Sacrificar()
     {
@@ -240,6 +175,13 @@ public class DinoSeguidor : MonoBehaviour
 
         if (col != null) col.enabled = false;
 
+        AudioClip clip = sonidoMuerte != null ? sonidoMuerte : (lider != null ? lider.sonidoMuerte : null);
+        if (clip != null)
+        {
+            Vector3 posAudio = Camera.main != null ? Camera.main.transform.position : transform.position;
+            AudioSource.PlayClipAtPoint(clip, posAudio);
+        }
+
         if (rb == null) rb = gameObject.AddComponent<Rigidbody2D>();
         rb.bodyType = RigidbodyType2D.Dynamic;
         rb.gravityScale = 2f;
@@ -247,16 +189,15 @@ public class DinoSeguidor : MonoBehaviour
 
         if (animator != null)
         {
-            animator.SetBool("EnSuelo", false);
-            animator.SetFloat("Velocidad", 0f);
-            animator.SetBool("Muerto", true);
-            animator.SetTrigger("Morir");
+            animator.SetBool(HashEnSuelo, false);
+            animator.SetFloat(HashVelocidad, 0f);
+            animator.SetBool(HashMuerto, true);
+            animator.SetTrigger(HashMorir);
         }
 
         Destroy(gameObject, 1.5f);
     }
 
-    // Mantenido por compatibilidad si algún script externo lo invoca
     public void CaerYMorir()
     {
         if (!reclutado) return;
@@ -268,84 +209,6 @@ public class DinoSeguidor : MonoBehaviour
         Sacrificar();
     }
 
-    // ────────────────────────────────────────────────────────────
-    //  Gestión de historial interpolado
-    // ────────────────────────────────────────────────────────────
-
-    private void RegistrarMuestraLider()
-    {
-        if (ultimoLiderRegistrado != lider.transform)
-        {
-            ultimoLiderRegistrado = lider.transform;
-            InicializarHistorial(lider.transform.position, lider.EstaEnSuelo());
-            return;
-        }
-
-        if (ultimoFrameRegistrado == Time.frameCount) return;
-        ultimoFrameRegistrado = Time.frameCount;
-
-        float ahora = Time.time;
-        historial.Add(new MuestraLider
-        {
-            posicion = lider.transform.position,
-            enSuelo = lider.EstaEnSuelo(),
-            tiempo = ahora
-        });
-
-        // Eliminar muestras antiguas fuera de la ventana de tiempo
-        float tiempoMinimo = ahora - DuracionMaxHistorial;
-        while (historial.Count > 2 && historial[1].tiempo < tiempoMinimo)
-        {
-            historial.RemoveAt(0);
-        }
-    }
-
-    private static MuestraLider ObtenerMuestraInterpolada(float tiempoObjetivo)
-    {
-        int count = historial.Count;
-        if (count == 1 || tiempoObjetivo <= historial[0].tiempo)
-            return historial[0];
-
-        if (tiempoObjetivo >= historial[count - 1].tiempo)
-            return historial[count - 1];
-
-        // Búsqueda desde el final (las consultas suelen estar cerca del tiempo actual)
-        for (int i = count - 2; i >= 0; i--)
-        {
-            MuestraLider a = historial[i];
-            MuestraLider b = historial[i + 1];
-            if (tiempoObjetivo >= a.tiempo && tiempoObjetivo <= b.tiempo)
-            {
-                float dt = b.tiempo - a.tiempo;
-                float t = dt > 0.0001f ? (tiempoObjetivo - a.tiempo) / dt : 1f;
-                return new MuestraLider
-                {
-                    posicion = Vector3.Lerp(a.posicion, b.posicion, t),
-                    enSuelo = t < 0.5f ? a.enSuelo : b.enSuelo,
-                    tiempo = tiempoObjetivo
-                };
-            }
-        }
-
-        return historial[count - 1];
-    }
-
-    private static void InicializarHistorial(Vector3 pos, bool enSuelo)
-    {
-        historial.Clear();
-        historial.Add(new MuestraLider
-        {
-            posicion = pos,
-            enSuelo = enSuelo,
-            tiempo = Time.time
-        });
-        ultimoFrameRegistrado = Time.frameCount;
-    }
-
-    public static void LimpiarHistorial()
-    {
-        historial.Clear();
-        ultimoLiderRegistrado = null;
-        ultimoFrameRegistrado = -1;
-    }
+    // Mantenido por compatibilidad con TransicionManager y Temporizador
+    public static void LimpiarHistorial() { }
 }

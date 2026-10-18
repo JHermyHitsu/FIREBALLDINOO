@@ -69,7 +69,7 @@ public class Movimiento : MonoBehaviour
         // Animator
         if (animator != null)
         {
-            animator.SetFloat("Velocidad", Mathf.Abs(entradaX));
+            animator.SetFloat("Velocidad", Mathf.Abs(entradaX) * boostMult);
             animator.SetBool("EnSuelo", estaEnSuelo);
         }
 
@@ -89,6 +89,7 @@ public class Movimiento : MonoBehaviour
     private void OnCollisionExit2D(Collision2D c) { if (c.gameObject.CompareTag("SUELO")) estaEnSuelo = false; }
 
     public bool EstaEnSuelo() => estaEnSuelo;
+    public bool TieneBoost() => boostTiempo > 0f;
 
     // Exponer estado del boost para la UI
     public float BoostTiempoRestante => boostTiempo;
