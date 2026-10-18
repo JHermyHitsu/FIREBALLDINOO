@@ -511,7 +511,7 @@ public class Temporizador : MonoBehaviour
 
         if (imagenTiempoAgotado != null)
         {
-            bool esPorTiempo = mensaje == "TIEMPO AGOTADO";
+            bool esPorTiempo = textoMensaje != null && textoMensaje.text == "TIEMPO AGOTADO";
             imagenTiempoAgotado.SetActive(esPorTiempo);
         }
 
