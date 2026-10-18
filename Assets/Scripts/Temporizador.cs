@@ -553,4 +553,10 @@ public class Temporizador : MonoBehaviour
         TransicionManager.EnsureExists(); // garantiza el intercambio del jugador al recargar
         SceneManager.LoadScene(EscenaBosque);
     }
+
+    public void Salir() // vuelve al menú principal
+    {
+        Time.timeScale = 1f;
+        UnityEngine.SceneManagement.SceneManager.LoadScene("ESCENA_MENU_INICIO");
+    }
 }
