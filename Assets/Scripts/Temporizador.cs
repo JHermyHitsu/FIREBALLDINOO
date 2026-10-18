@@ -90,7 +90,6 @@ public class Temporizador : MonoBehaviour
         if (panelGameOver == null || textoMensaje == null || textoTiempo == null)
             ConstruirUIPersistente();
         AsegurarContadorAmigos();
-        AsegurarBarraBoost();
         AsegurarSegmentosBoost();
         AsegurarPanelVictoria();
     }
@@ -134,44 +133,6 @@ public class Temporizador : MonoBehaviour
     }
 
     // Fallback por código: crea la barra de boost si la escena no la trae.
-    void AsegurarBarraBoost()
-    {
-        if (barraBoost != null) return;
-
-        Transform canvasT = null;
-        if (textoTiempo != null) canvasT = textoTiempo.transform.parent;
-        if (canvasT == null) canvasT = transform.Find("CanvasPersistente");
-
-        if (canvasT == null)
-        {
-            var canvasGO = new GameObject("CanvasPersistente");
-            canvasGO.transform.SetParent(transform, false);
-            var canvas = canvasGO.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 100;
-            canvasGO.AddComponent<GraphicRaycaster>();
-            var scaler = canvasGO.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(800f, 600f);
-            canvasT = canvasGO.transform;
-        }
-
-        var barraGO = new GameObject("BarraBoost");
-        barraGO.transform.SetParent(canvasT, false);
-        var rt = barraGO.AddComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0.5f, 0f);
-        rt.anchorMax = new Vector2(0.5f, 0f);
-        rt.anchoredPosition = new Vector2(0f, 40f);
-        rt.sizeDelta = new Vector2(200f, 20f);
-        rt.pivot = new Vector2(0.5f, 0f);
-
-        barraBoost = barraGO.AddComponent<Image>();
-        barraBoost.type = Image.Type.Filled;
-        barraBoost.fillMethod = Image.FillMethod.Horizontal;
-        barraBoost.fillAmount = 1f;
-        barraBoost.color = new Color(1f, 0.843f, 0f, 1f);
-    }
-
     // Fallback por código: crea 3 segmentos si la escena no los trae.
     void AsegurarSegmentosBoost()
     {
