@@ -142,5 +142,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemComida
   multiplicador: 1.5
-  duracion: 4
+  duracion: 15
   sonidoComer: {fileID: 8300000, guid: eb5da4a81484a26f3bc3a83bbeacfc1f, type: 3}
+  textoHint: "\xA1Come para correr m\xE1s r\xE1pido!"
+  duracionHint: 3
+  maxVecesHint: 2
+  alturaHint: 1.5

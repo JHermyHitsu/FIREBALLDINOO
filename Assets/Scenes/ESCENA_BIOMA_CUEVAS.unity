@@ -3347,7 +3347,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 550be70fd15d369b2829941baede4995, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MetaFinal
-  mensajeVictoria: "\xA1REFUGIO ALCANZADO!"
 --- !u!212 &315591245
 SpriteRenderer:
   serializedVersion: 2
@@ -21171,11 +21170,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8750539216238323139, guid: bb357932535e028c8befd952da594171, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 72.1
+      value: 56.9
       objectReference: {fileID: 0}
     - target: {fileID: 8750539216238323139, guid: bb357932535e028c8befd952da594171, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 5.9
+      value: 3.5
       objectReference: {fileID: 0}
     - target: {fileID: 8750539216238323139, guid: bb357932535e028c8befd952da594171, type: 3}
       propertyPath: m_LocalPosition.z
