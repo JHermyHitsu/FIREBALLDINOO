@@ -749,6 +749,6 @@ public class Temporizador : MonoBehaviour
     public void Salir() // vuelve al menú principal
     {
         Time.timeScale = 1f;
-        UnityEngine.SceneManagement.SceneManager.LoadScene("ESCENA_MENU_INICIO");
+        UnityEngine.SceneManagement.SceneManager.LoadScene(Escenas.MenuInicio);
     }
 }

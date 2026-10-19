@@ -313,7 +313,7 @@ MonoBehaviour:
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -381,7 +381,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 914350740}
-  - component: {fileID: 914350741}
   - component: {fileID: 914350742}
   m_Layer: 0
   m_Name: Gestion_Menu
@@ -405,19 +404,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &914350741
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 914350739}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a6cff785b0ad6f46890832bc37a6ddba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MenuInicio
-  escenaJuego: ESCENA_BIOMA_BOSQUE
 --- !u!114 &914350742
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -437,8 +423,6 @@ MonoBehaviour:
   - {fileID: -1201519295121979567, guid: 4888863e4c1ce2d1daadc688195ca2ee, type: 3}
   - {fileID: -3837395233606504902, guid: 42d925038a19e1ce2b3e60011c212b8e, type: 3}
   tiempoPorImagen: 3
-  escenaJuego: ESCENA_BIOMA_BOSQUE
-  botonSkip: {fileID: 0}
   botonJugar: {fileID: 685923656}
 --- !u!1 &941121852
 GameObject:

@@ -49,7 +49,7 @@ public class Pausa : MonoBehaviour
     public void Salir()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("ESCENA_MENU_INICIO");
+        SceneManager.LoadScene(Escenas.MenuInicio);
     }
 
     // Asegura que al destruirse (cambio de escena) el timeScale quede en 1.

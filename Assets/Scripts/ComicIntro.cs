@@ -3,6 +3,11 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections;
 
+/// <summary>
+/// Muestra el comic de introduccion y carga la escena de juego al terminar.
+/// Se adjunta al GameObject "ComicIntro" (antes "Gestion_Menu").
+/// El boton JUGAR llama a IniciarComic() via onClick.
+/// </summary>
 public class ComicIntro : MonoBehaviour
 {
     [Header("Imagenes del comic")]
@@ -11,25 +16,24 @@ public class ComicIntro : MonoBehaviour
 
     [Header("Configuracion")]
     public float tiempoPorImagen = 3f;
-    public string escenaJuego = "ESCENA_BIOMA_BOSQUE";
 
-    [Header("Boton Skip (opcional)")]
-    public GameObject botonSkip;
-
-    [Header("Boton JUGAR (se oculta al iniciar comic)")]
+    [Header("Boton JUGAR (se oculta al iniciar el comic)")]
     public GameObject botonJugar;
 
-    private int indiceActual = 0;
-    private bool saltado = false;
-    private bool comicIniciado = false;
+    int indiceActual = 0;
+    bool comicIniciado = false;
 
     void Start()
     {
-        // No iniciar automáticamente — esperar al botón JUGAR
+        // La imagen del comic arranca oculta; se muestra al presionar JUGAR.
         if (imagenIntro != null)
             imagenIntro.gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// Inicia el slideshow. Se llama desde el boton JUGAR.
+    /// Si no hay imagenes, carga el juego directamente.
+    /// </summary>
     public void IniciarComic()
     {
         if (comicIniciado) return;
@@ -41,11 +45,8 @@ public class ComicIntro : MonoBehaviour
             return;
         }
 
-        if (imagenIntro != null)
-        {
-            imagenIntro.gameObject.SetActive(true);
-            imagenIntro.sprite = imagenes[0];
-        }
+        imagenIntro.gameObject.SetActive(true);
+        imagenIntro.sprite = imagenes[0];
 
         if (botonJugar != null)
             botonJugar.SetActive(false);
@@ -53,46 +54,27 @@ public class ComicIntro : MonoBehaviour
         StartCoroutine(AvanzarComic());
     }
 
+    /// <summary>
+    /// Avanza las imagenes automaticamente segun tiempoPorImagen.
+    /// Al terminar, carga la escena de juego.
+    /// </summary>
     IEnumerator AvanzarComic()
     {
         while (indiceActual < imagenes.Length - 1)
         {
             yield return new WaitForSeconds(tiempoPorImagen);
-            if (saltado) yield break;
             indiceActual++;
-            if (imagenIntro != null)
-                imagenIntro.sprite = imagenes[indiceActual];
+            imagenIntro.sprite = imagenes[indiceActual];
         }
 
         yield return new WaitForSeconds(tiempoPorImagen);
-        if (!saltado)
-            CargarJuego();
-    }
-
-    public void Saltar()
-    {
-        saltado = true;
-        StopAllCoroutines();
         CargarJuego();
-    }
-
-    public void Siguiente()
-    {
-        if (saltado) return;
-        StopAllCoroutines();
-        indiceActual++;
-        if (indiceActual >= imagenes.Length)
-        {
-            CargarJuego();
-            return;
-        }
-        if (imagenIntro != null)
-            imagenIntro.sprite = imagenes[indiceActual];
-        StartCoroutine(AvanzarComic());
     }
 
     void CargarJuego()
     {
-        SceneManager.LoadScene(escenaJuego);
+        // El menu no tiene Player, asi que va directo por SceneManager.
+        // TransicionManager es solo para cambios de escena dentro del juego.
+        SceneManager.LoadScene(Escenas.BiomaBosque);
     }
 }
