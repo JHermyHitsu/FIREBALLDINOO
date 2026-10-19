@@ -19,7 +19,7 @@ public class MetaFinal : MonoBehaviour
     {
         if (yaGanado || !otro.CompareTag("Player")) return;
         yaGanado = true;
-        Temporizador.EnsureExists().MostrarVictoria();
+        PanelFinPartida.EnsureExists().MostrarVictoria();
     }
 
     // Cajita visible solo en el editor para colocarla bien al final del nivel.
