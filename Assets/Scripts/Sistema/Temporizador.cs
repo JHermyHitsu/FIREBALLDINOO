@@ -16,15 +16,13 @@ public class Temporizador : MonoBehaviour
     public const string NombrePanelGameOver = "PanelGameOver";
 
     [Header("Configuración")]
-    public float tiempoInicial = 180f;
-    public float tiempoRestante;
-    public TextMeshProUGUI textoTiempo;
     public GameObject panelGameOver; // arrastra PanelGameOver aquí
     public GameObject panelPerder;   // arrastra PanelPerder aquí (todos caídos)
 
-    // Referencia al componente HUD (vive en el mismo GameManager).
-    // No serializado: se resuelve en runtime en Awake.
+    // Referencias a los componentes hermanos (viven en el mismo GameManager).
+    // No serializados: se resuelven en runtime en Awake.
     HUD hud;
+    Reloj reloj;
 
     public TextMeshProUGUI textoMensaje; // arrastra Texto_TiempoAgotado aquí
     public GameObject imagenTiempoAgotado; // solo se muestra al agotarse el tiempo
@@ -37,26 +35,26 @@ public class Temporizador : MonoBehaviour
     public GameObject panelVictoria;
     public TextMeshProUGUI textoVictoria;
     bool terminado = false;
-    int ultimoSegundoTick = 9;
-    float progresoTick = 1f;
-    Vector2 posicionBaseTimer = new Vector2(0f, -40f);
 
     void Awake()
     {
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        tiempoRestante = tiempoInicial;
 
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
         AsegurarUI();
 
-        // El HUD vive en el mismo GameManager: se resuelve (o se agrega) ahora,
-        // despues de AsegurarUI() para que el canvas persistente ya exista.
+        // El HUD y el Reloj viven en el mismo GameManager: se resuelven (o se
+        // agregan) ahora, despues de AsegurarUI() para que el canvas persistente
+        // ya exista.
         hud = GetComponent<HUD>();
         if (hud == null) hud = gameObject.AddComponent<HUD>();
+
+        reloj = GetComponent<Reloj>();
+        if (reloj == null) reloj = gameObject.AddComponent<Reloj>();
 
         SceneManager.sceneLoaded += AlCargarEscena;
     }
@@ -113,15 +111,6 @@ public class Temporizador : MonoBehaviour
         // al Temporizador persistente (el de la escena se destruyó).
         ReconectarBotonesPaneles();
 
-        // Reasignar textoTiempo si se perdio (fallback).
-        if (textoTiempo == null)
-        {
-            foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects())
-            {
-                var tt = BuscarHijoRecursivo(root, "TextoTiempo");
-                if (tt != null) { textoTiempo = tt.GetComponent<TMPro.TextMeshProUGUI>(); break; }
-            }
-        }
     }
 
     // Reconecta los botones de los paneles de Game Over / Perder al Temporizador persistente.
@@ -200,7 +189,7 @@ public class Temporizador : MonoBehaviour
 
     public void AsegurarUI()
     {
-        if (panelGameOver == null || textoTiempo == null)
+        if (panelGameOver == null)
             ConstruirUIPersistente();
         if (panelVictoria == null)
         {
@@ -226,18 +215,6 @@ public class Temporizador : MonoBehaviour
         var scaler = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(800f, 600f);
-
-        // Reloj HUD (arriba al centro)
-        var relojGO = new GameObject("TextoTiempo");
-        relojGO.transform.SetParent(canvasGO.transform, false);
-        textoTiempo = relojGO.AddComponent<TextMeshProUGUI>();
-        textoTiempo.alignment = TextAlignmentOptions.Center;
-        textoTiempo.fontSize = 42;
-        var rtReloj = relojGO.GetComponent<RectTransform>();
-        rtReloj.anchorMin = new Vector2(0.5f, 1f);
-        rtReloj.anchorMax = new Vector2(0.5f, 1f);
-        rtReloj.anchoredPosition = new Vector2(0f, -40f);
-        rtReloj.sizeDelta = new Vector2(200f, 50f);
 
         // Panel de Game Over (pantalla completa, inicia oculto)
         panelGameOver = new GameObject("PanelGameOver");
@@ -386,82 +363,22 @@ public class Temporizador : MonoBehaviour
     void Update()
     {
         if (terminado) return;
-        if (tiempoRestante <= 0) return;
-        tiempoRestante -= Time.deltaTime;
-        if (textoTiempo != null)
-        {
-            int m = Mathf.FloorToInt(tiempoRestante / 60f);
-            int s = Mathf.FloorToInt(tiempoRestante % 60f);
-            textoTiempo.text = $"{m:00}:{s:00}";
 
-            // Color rojo neón a partir del segundo 15
-            if (tiempoRestante <= 15f)
-                textoTiempo.color = new Color(1f, 0.165f, 0.294f); // #ff2a4b
-            else
-                textoTiempo.color = Color.white;
-
-            // Tick de pánico cada segundo a partir del segundo 8 (scale + rotación + desplazamiento)
-            if (tiempoRestante <= 8f && tiempoRestante > 0f)
-            {
-                int segundoActual = Mathf.FloorToInt(tiempoRestante);
-                if (segundoActual != ultimoSegundoTick)
-                {
-                    ultimoSegundoTick = segundoActual;
-                    progresoTick = 0f;
-                    // Capturar la posición base real del timer en la escena
-                    posicionBaseTimer = textoTiempo.rectTransform.anchoredPosition;
-                }
-                progresoTick = Mathf.Min(1f, progresoTick + Time.deltaTime / 0.2f);
-
-                float t = progresoTick;
-                float scale, rot, x;
-                if (t < 0.3f)
-                {
-                    float p = t / 0.3f;
-                    scale = Mathf.Lerp(1f, 1.12f, p);
-                    rot = Mathf.Lerp(0f, -1.5f, p);
-                    x = Mathf.Lerp(0f, -3f, p);
-                }
-                else if (t < 0.6f)
-                {
-                    float p = (t - 0.3f) / 0.3f;
-                    scale = Mathf.Lerp(1.12f, 1.05f, p);
-                    rot = Mathf.Lerp(-1.5f, 1f, p);
-                    x = Mathf.Lerp(-3f, 2f, p);
-                }
-                else
-                {
-                    float p = (t - 0.6f) / 0.4f;
-                    scale = Mathf.Lerp(1.05f, 1f, p);
-                    rot = Mathf.Lerp(1f, 0f, p);
-                    x = Mathf.Lerp(2f, 0f, p);
-                }
-
-                textoTiempo.rectTransform.localScale = Vector3.one * scale;
-                textoTiempo.rectTransform.localEulerAngles = new Vector3(0f, 0f, rot);
-                textoTiempo.rectTransform.anchoredPosition = new Vector2(posicionBaseTimer.x + x, posicionBaseTimer.y);
-            }
-            else
-            {
-                textoTiempo.rectTransform.localScale = Vector3.one;
-                textoTiempo.rectTransform.localEulerAngles = Vector3.zero;
-                // No forzar anchoredPosition: respeta la posición definida en la escena
-            }
-        }
         // Temblor de cámara cuando el tiempo está bajo (8s o menos)
         var cam = FindFirstObjectByType<Camara>();
         if (cam != null)
         {
-            if (tiempoRestante <= 16f && tiempoRestante > 0f)
+            float tr = (reloj != null) ? reloj.TiempoRestante : 0f;
+            if (tr <= 16f && tr > 0f)
                 cam.ActivarTemblor(true, 1.2f);
             else
                 cam.ActivarTemblor(false, 0f);
         }
 
-        if (tiempoRestante <= 0)
+        if (reloj != null && reloj.TiempoRestante <= 0f)
         {
-            tiempoRestante = 0;
-            if (textoTiempo != null) textoTiempo.text = "00:00";
+            reloj.Pausar();
+            reloj.Apagar();
             MostrarGameOver();
         }
     }
@@ -472,7 +389,7 @@ public class Temporizador : MonoBehaviour
         terminado = true;
         var mov = FindFirstObjectByType<Movimiento>();
         if (mov != null) mov.enabled = false; // frena al dino, ya no es Morir()
-        if (textoTiempo != null) textoTiempo.gameObject.SetActive(false);
+        if (reloj != null) { reloj.Apagar(); reloj.Pausar(); }
         if (hud != null) hud.Apagar();
         if (panelVictoria != null) panelVictoria.SetActive(false);
         var camGO = FindFirstObjectByType<Camara>();
@@ -508,7 +425,7 @@ public class Temporizador : MonoBehaviour
         var mov = FindFirstObjectByType<Movimiento>();
         if (mov != null) mov.enabled = false;
 
-        if (textoTiempo != null) textoTiempo.gameObject.SetActive(false);
+        if (reloj != null) { reloj.Apagar(); reloj.Pausar(); }
         if (hud != null) hud.Apagar();
         if (mov != null) mov.ResetearBoost();
         if (panelGameOver != null) panelGameOver.SetActive(false);
@@ -535,18 +452,9 @@ public class Temporizador : MonoBehaviour
     public void Reintentar() // vuelve siempre a Bosque con el tiempo reseteado
     {
         terminado = false;
-        tiempoRestante = tiempoInicial;
-        ultimoSegundoTick = 9;
-        progresoTick = 1f;
-        if (textoTiempo != null)
-        {
-            textoTiempo.gameObject.SetActive(true);
-            int m = Mathf.FloorToInt(tiempoRestante / 60f);
-            int sec = Mathf.FloorToInt(tiempoRestante % 60f);
-            textoTiempo.text = $"{m:00}:{sec:00}";
-        }
 
-        // El contador de amigos y el boost se restauran siempre.
+        // El reloj y el HUD se restauran siempre.
+        if (reloj != null) reloj.Reiniciar();
         if (hud != null) hud.Reiniciar();
         if (panelGameOver != null) panelGameOver.SetActive(false);
         if (panelVictoria != null) panelVictoria.SetActive(false);
