@@ -25,7 +25,10 @@ public class Movimiento : MonoBehaviour
 
     private float entradaX;
     private bool estaEnSuelo = false;
-    private bool vivo = true;
+
+    // Salud y muerte viven en SistemaSaludyMuerte.
+    public SistemaSaludyMuerte saludYMuerte;
+    public bool Vivo => saludYMuerte != null ? saludYMuerte.Vivo : true;
 
     void Start()
     {
@@ -36,11 +39,14 @@ public class Movimiento : MonoBehaviour
 
         if (estadoJugador == null) estadoJugador = GetComponent<EstadoJugador>();
         if (estadoJugador == null) estadoJugador = gameObject.AddComponent<EstadoJugador>();
+
+        if (saludYMuerte == null) saludYMuerte = GetComponent<SistemaSaludyMuerte>();
+        if (saludYMuerte == null) saludYMuerte = gameObject.AddComponent<SistemaSaludyMuerte>();
     }
 
     void Update()
     {
-        if (!vivo) return;
+        if (!Vivo) return;
 
         if (estadoJugador != null) estadoJugador.Tick(Time.deltaTime);
 
@@ -67,7 +73,7 @@ public class Movimiento : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!vivo) return;
+        if (!Vivo) return;
         float mult = (estadoJugador != null) ? estadoJugador.BoostMult : 1f;
         rb.linearVelocity = new Vector2(entradaX * velocidad * mult, rb.linearVelocity.y);
     }
@@ -78,6 +84,7 @@ public class Movimiento : MonoBehaviour
     private void OnCollisionExit2D(Collision2D c) { if (c.gameObject.CompareTag("SUELO")) estaEnSuelo = false; }
 
     public bool EstaEnSuelo() => estaEnSuelo;
+    public void SetEnSuelo(bool v) => estaEnSuelo = v;
 
     // Resetea el boost (usado al morir / reintentar) para que no quede activo.
     public void ResetearBoost()
@@ -118,46 +125,6 @@ public class Movimiento : MonoBehaviour
 
     public void Morir(bool esPrecipicio = false)
     {
-        if (!vivo || (estadoJugador != null && estadoJugador.Inmune)) return;
-
-        // Si hay un dino de vida extra, se sacrifica y da super impulso
-        if (seguidores.Count > 0)
-        {
-            int ultimo = seguidores.Count - 1;
-            DinoSeguidor sacrificado = seguidores[ultimo];
-            seguidores.RemoveAt(ultimo);
-
-            if (sacrificado != null) sacrificado.Sacrificar();
-
-            for (int i = 0; i < seguidores.Count; i++)
-                if (seguidores[i] != null) seguidores[i].AsignarIndice(i);
-
-            if (sfx != null && sonidoSalto != null) sfx.PlayOneShot(sonidoSalto);
-
-            // Ventana de inmunidad mientras el jugador sale impulsado de la zona de daño
-            if (estadoJugador != null) estadoJugador.SetInmune(0.8f);
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, fuerzaSalto * 1.4f);
-            estaEnSuelo = false;
-            return;
-        }
-
-        // Muerte real
-        vivo = false;
-
-        if (sfx != null && sonidoMuerte != null) sfx.PlayOneShot(sonidoMuerte);
-
-        if (estadoJugador != null) estadoJugador.AnimarMuerte();
-
-        rb.linearVelocity = new Vector2(0f, 10f);
-        if (col != null) col.enabled = false;
-
-        Invoke(nameof(MostrarBotonMuerte), 1.5f);
-    }
-
-    void MostrarBotonMuerte()
-    {
-        // El Temporizador es persistente; EnsureExists cubre el Play directo
-        // en Desierto/Cueva. Reintentar vuelve siempre a Bosque.
-        PanelFinPartida.EnsureExists().MostrarGameOver(todosCaidos: true);
+        if (saludYMuerte != null) saludYMuerte.Morir(esPrecipicio);
     }
 }
