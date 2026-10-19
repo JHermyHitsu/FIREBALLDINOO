@@ -717,21 +717,25 @@ public class Temporizador : MonoBehaviour
         if (textoTiempo != null)
         {
             textoTiempo.gameObject.SetActive(true);
-            if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(true);
-            if (barraBoost != null) barraBoost.gameObject.SetActive(true);
-            if (segmentosBoost != null)
-            {
-                foreach (var s in segmentosBoost)
-                    if (s != null) s.gameObject.SetActive(false);
-                if (segmentosBoost.Length > 0 && segmentosBoost[0] != null)
-                {
-                    Transform padre = segmentosBoost[0].transform.parent;
-                    if (padre != null) padre.gameObject.SetActive(false);
-                }
-            }
             int m = Mathf.FloorToInt(tiempoRestante / 60f);
             int sec = Mathf.FloorToInt(tiempoRestante % 60f);
             textoTiempo.text = $"{m:00}:{sec:00}";
+        }
+
+        // El contador de amigos y el boost se restauran siempre.
+        // Cada bloque va por su cuenta: depender del reloj los dejaba
+        // apagados para siempre si el texto del tiempo no existia.
+        if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(true);
+        if (barraBoost != null) barraBoost.gameObject.SetActive(true);
+        if (segmentosBoost != null)
+        {
+            foreach (var s in segmentosBoost)
+                if (s != null) s.gameObject.SetActive(false);
+            if (segmentosBoost.Length > 0 && segmentosBoost[0] != null)
+            {
+                Transform padre = segmentosBoost[0].transform.parent;
+                if (padre != null) padre.gameObject.SetActive(false);
+            }
         }
         if (panelGameOver != null) panelGameOver.SetActive(false);
         if (panelVictoria != null) panelVictoria.SetActive(false);
