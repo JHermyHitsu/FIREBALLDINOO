@@ -6,10 +6,6 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public class MetaFinal : MonoBehaviour
 {
-    [Header("Mensaje de victoria")]
-    [Tooltip("Título que se muestra en el panel final.")]
-    public string mensajeVictoria = "¡REFUGIO ALCANZADO!";
-
     bool yaGanado = false;
 
     void OnValidate()
@@ -23,7 +19,7 @@ public class MetaFinal : MonoBehaviour
     {
         if (yaGanado || !otro.CompareTag("Player")) return;
         yaGanado = true;
-        Temporizador.EnsureExists().MostrarVictoria(mensajeVictoria);
+        Temporizador.EnsureExists().MostrarVictoria();
     }
 
     // Cajita visible solo en el editor para colocarla bien al final del nivel.

@@ -660,7 +660,7 @@ public class Temporizador : MonoBehaviour
     }
 
     // Victoria al llegar a la MetaFinal: congela reloj y dino, muestra stats.
-    public void MostrarVictoria(string mensaje = "¡REFUGIO ALCANZADO!")
+    public void MostrarVictoria()
     {
         if (terminado) return; // si ya murió o se acabó el tiempo, no hay victoria
         AsegurarUI();
