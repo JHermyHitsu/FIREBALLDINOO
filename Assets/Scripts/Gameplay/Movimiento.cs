@@ -11,9 +11,9 @@ public class Movimiento : MonoBehaviour
     public AudioClip sonidoSalto;
     public AudioClip sonidoMuerte;
 
-    [Header("Sistema de Vidas Extra")]
-    public int maxSeguidores = 4;
-    public List<DinoSeguidor> seguidores = new List<DinoSeguidor>();
+    // Fila de seguidores vive en ControladorFila.
+    public ControladorFila controladorFila;
+    public List<DinoSeguidor> seguidores => controladorFila != null ? controladorFila.seguidores : null;
 
     // Estado del jugador (boost + animacion) vive en EstadoJugador.
     public EstadoJugador estadoJugador;
@@ -42,6 +42,9 @@ public class Movimiento : MonoBehaviour
 
         if (saludYMuerte == null) saludYMuerte = GetComponent<SistemaSaludyMuerte>();
         if (saludYMuerte == null) saludYMuerte = gameObject.AddComponent<SistemaSaludyMuerte>();
+
+        if (controladorFila == null) controladorFila = GetComponent<ControladorFila>();
+        if (controladorFila == null) controladorFila = gameObject.AddComponent<ControladorFila>();
     }
 
     void Update()
@@ -104,23 +107,13 @@ public class Movimiento : MonoBehaviour
 
     public bool AgregarSeguidor(DinoSeguidor amigo)
     {
-        if (seguidores.Count >= maxSeguidores) return false;
-        seguidores.Add(amigo);
-        amigo.AsignarIndice(seguidores.Count - 1);
-        return true;
+        if (controladorFila != null) return controladorFila.AgregarSeguidor(amigo);
+        return false;
     }
 
     public void RemoverSeguidor(DinoSeguidor amigo)
     {
-        if (seguidores.Contains(amigo))
-        {
-            seguidores.Remove(amigo);
-            for (int i = 0; i < seguidores.Count; i++)
-            {
-                if (seguidores[i] != null)
-                    seguidores[i].AsignarIndice(i);
-            }
-        }
+        if (controladorFila != null) controladorFila.RemoverSeguidor(amigo);
     }
 
     public void Morir(bool esPrecipicio = false)
