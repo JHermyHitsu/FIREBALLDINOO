@@ -303,8 +303,7 @@ public class TransicionManager : MonoBehaviour
             }
         }
 
-        // Limpiar historial de posiciones para que arranquen desde el spawn
-        DinoSeguidor.LimpiarHistorial();
+        // (LimpiarHistorial era no-op; las posiciones se reasignan abajo)
 
         // 6. Re-linkear la cámara de la escena nueva y teleportarla (evita el barrido largo).
         Camara cam = FindFirstObjectByType<Camara>();

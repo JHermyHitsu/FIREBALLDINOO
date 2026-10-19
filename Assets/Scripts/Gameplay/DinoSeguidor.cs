@@ -198,6 +198,4 @@ public class DinoSeguidor : MonoBehaviour
         Destroy(gameObject, 1.5f);
     }
 
-    // Mantenido por compatibilidad con TransicionManager y Temporizador
-    public static void LimpiarHistorial() { }
 }

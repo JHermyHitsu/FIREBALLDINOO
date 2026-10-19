@@ -11,6 +11,9 @@ public class Temporizador : MonoBehaviour
 {
     public static Temporizador Instance;
     public const string EscenaBosque = "ESCENA_BIOMA_BOSQUE";
+    // Nombre canónico del panel de Game Over. En Bosque la escena lo llama
+    // "PanelGamerOver" (con r); se acepta como alias para no romper.
+    public const string NombrePanelGameOver = "PanelGameOver";
 
     [Header("Configuración")]
     public float tiempoInicial = 180f;
@@ -51,7 +54,8 @@ public class Temporizador : MonoBehaviour
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
         AsegurarUI();
-        // Los segmentos de boost solo se muestran cuando el boost está activo
+        // Los segmentos de boost solo se muestran cuando el boost está activo.
+        // No apagar el padre si es el Canvas: apagaría todo el HUD (bug B1).
         if (segmentosBoost != null)
         {
             foreach (var s in segmentosBoost)
@@ -59,7 +63,8 @@ public class Temporizador : MonoBehaviour
             if (segmentosBoost.Length > 0 && segmentosBoost[0] != null)
             {
                 Transform padre = segmentosBoost[0].transform.parent;
-                if (padre != null) padre.gameObject.SetActive(false);
+                if (padre != null && padre.GetComponent<Canvas>() == null)
+                    padre.gameObject.SetActive(false);
             }
         }
         SceneManager.sceneLoaded += AlCargarEscena;
@@ -89,6 +94,7 @@ public class Temporizador : MonoBehaviour
             if (panelVictoria != null) panelVictoria.SetActive(false);
             panelVictoria = pvEscena;
             Transform t = panelVictoria.transform.Find("TextoVictoria");
+            if (t == null) t = panelVictoria.transform.Find("Texto_Victoria");
             if (t != null) textoVictoria = t.GetComponent<TMPro.TextMeshProUGUI>();
         }
 
@@ -97,7 +103,8 @@ public class Temporizador : MonoBehaviour
         // escena anterior se destruyeron, así que hay que tomar los de la nueva.
         foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects())
         {
-            var pg = BuscarHijoRecursivo(root, "PanelGameOver");
+            var pg = BuscarHijoRecursivo(root, NombrePanelGameOver);
+            if (pg == null) pg = BuscarHijoRecursivo(root, "PanelGamerOver");
             if (pg != null && pg != panelGameOver)
             {
                 if (panelGameOver != null) panelGameOver.SetActive(false);
@@ -390,6 +397,7 @@ public class Temporizador : MonoBehaviour
             if (textoVictoria == null)
             {
                 Transform t = panelVictoria.transform.Find("TextoVictoria");
+                if (t == null) t = panelVictoria.transform.Find("Texto_Victoria");
                 if (t != null) textoVictoria = t.GetComponent<TMPro.TextMeshProUGUI>();
             }
             return;
@@ -423,7 +431,7 @@ public class Temporizador : MonoBehaviour
         rtPanel.offsetMin = Vector2.zero;
         rtPanel.offsetMax = Vector2.zero;
 
-        var msgGO = new GameObject("Texto_Victoria");
+        var msgGO = new GameObject("TextoVictoria");
         msgGO.transform.SetParent(panelVictoria.transform, false);
         textoVictoria = msgGO.AddComponent<TextMeshProUGUI>();
         textoVictoria.alignment = TextAlignmentOptions.Center;
@@ -590,11 +598,13 @@ public class Temporizador : MonoBehaviour
                 if (segmentosBoost[i] != null)
                     segmentosBoost[i].gameObject.SetActive(i < activos);
             }
-            // Activar/desactivar el contenedor (padre) según si hay boost
+            // Activar/desactivar el contenedor (padre) según si hay boost.
+            // No tocar el padre si es el Canvas (bug B1).
             if (segmentosBoost[0] != null)
             {
                 Transform padre = segmentosBoost[0].transform.parent;
-                if (padre != null) padre.gameObject.SetActive(activos > 0);
+                if (padre != null && padre.GetComponent<Canvas>() == null)
+                    padre.gameObject.SetActive(activos > 0);
             }
         }
         // Temblor de cámara cuando el tiempo está bajo (8s o menos)
@@ -627,7 +637,8 @@ public class Temporizador : MonoBehaviour
         var camGO = FindFirstObjectByType<Camara>();
         if (camGO != null) camGO.ActivarTemblor(false, 0f);
 
-        // Apagar boost (segmentos + contenedor + estado logico) al morir
+        // Apagar boost (segmentos + contenedor + estado logico) al morir.
+        // No apagar el padre si es el Canvas (bug B1).
         if (barraBoost != null) barraBoost.gameObject.SetActive(false);
         if (segmentosBoost != null)
         {
@@ -636,7 +647,8 @@ public class Temporizador : MonoBehaviour
             if (segmentosBoost.Length > 0 && segmentosBoost[0] != null)
             {
                 Transform padre = segmentosBoost[0].transform.parent;
-                if (padre != null) padre.gameObject.SetActive(false);
+                if (padre != null && padre.GetComponent<Canvas>() == null)
+                    padre.gameObject.SetActive(false);
             }
         }
         var movMuerte = FindFirstObjectByType<Movimiento>();
@@ -679,7 +691,8 @@ public class Temporizador : MonoBehaviour
             if (segmentosBoost.Length > 0 && segmentosBoost[0] != null)
             {
                 Transform padre = segmentosBoost[0].transform.parent;
-                if (padre != null) padre.gameObject.SetActive(false);
+                if (padre != null && padre.GetComponent<Canvas>() == null)
+                    padre.gameObject.SetActive(false);
             }
         }
         if (mov != null) mov.ResetearBoost();
@@ -732,7 +745,8 @@ public class Temporizador : MonoBehaviour
             if (segmentosBoost.Length > 0 && segmentosBoost[0] != null)
             {
                 Transform padre = segmentosBoost[0].transform.parent;
-                if (padre != null) padre.gameObject.SetActive(false);
+                if (padre != null && padre.GetComponent<Canvas>() == null)
+                    padre.gameObject.SetActive(false);
             }
         }
         if (panelGameOver != null) panelGameOver.SetActive(false);
@@ -743,7 +757,6 @@ public class Temporizador : MonoBehaviour
         if (audioSource != null) audioSource.Stop();
         var movReintentar = FindFirstObjectByType<Movimiento>();
         if (movReintentar != null) movReintentar.ResetearBoost();
-        DinoSeguidor.LimpiarHistorial(); // la fila no debe arrastrar posiciones del bioma anterior
         TransicionManager.EnsureExists(); // garantiza el intercambio del jugador al recargar
         SceneManager.LoadScene(EscenaBosque);
     }
