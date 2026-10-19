@@ -19,15 +19,13 @@ public class Temporizador : MonoBehaviour
     public float tiempoInicial = 180f;
     public float tiempoRestante;
     public TextMeshProUGUI textoTiempo;
-    public TextMeshProUGUI textoContadorAmigos; // contador de amigos (arriba a la izquierda)
-    public Image barraBoost; // barra de boost (abajo al centro)
-    public Image[] segmentosBoost; // segmentos de boost estilo Subway Surfers
     public GameObject panelGameOver; // arrastra PanelGameOver aquí
     public GameObject panelPerder;   // arrastra PanelPerder aquí (todos caídos)
 
-    // Estado del contador de amigos
-    int ultimoCountAmigos = 0;
-    float progresoPopAmigos = 1f;
+    // Referencia al componente HUD (vive en el mismo GameManager).
+    // No serializado: se resuelve en runtime en Awake.
+    HUD hud;
+
     public TextMeshProUGUI textoMensaje; // arrastra Texto_TiempoAgotado aquí
     public GameObject imagenTiempoAgotado; // solo se muestra al agotarse el tiempo
     [Header("Sonido de Perder")]
@@ -54,19 +52,12 @@ public class Temporizador : MonoBehaviour
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
         AsegurarUI();
-        // Los segmentos de boost solo se muestran cuando el boost está activo.
-        // No apagar el padre si es el Canvas: apagaría todo el HUD (bug B1).
-        if (segmentosBoost != null)
-        {
-            foreach (var s in segmentosBoost)
-                if (s != null) s.gameObject.SetActive(false);
-            if (segmentosBoost.Length > 0 && segmentosBoost[0] != null)
-            {
-                Transform padre = segmentosBoost[0].transform.parent;
-                if (padre != null && padre.GetComponent<Canvas>() == null)
-                    padre.gameObject.SetActive(false);
-            }
-        }
+
+        // El HUD vive en el mismo GameManager: se resuelve (o se agrega) ahora,
+        // despues de AsegurarUI() para que el canvas persistente ya exista.
+        hud = GetComponent<HUD>();
+        if (hud == null) hud = gameObject.AddComponent<HUD>();
+
         SceneManager.sceneLoaded += AlCargarEscena;
     }
 
@@ -122,21 +113,13 @@ public class Temporizador : MonoBehaviour
         // al Temporizador persistente (el de la escena se destruyó).
         ReconectarBotonesPaneles();
 
-        // Reasignar textoTiempo / textoContadorAmigos si se perdieron (fallback).
+        // Reasignar textoTiempo si se perdio (fallback).
         if (textoTiempo == null)
         {
             foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects())
             {
                 var tt = BuscarHijoRecursivo(root, "TextoTiempo");
                 if (tt != null) { textoTiempo = tt.GetComponent<TMPro.TextMeshProUGUI>(); break; }
-            }
-        }
-        if (textoContadorAmigos == null)
-        {
-            foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects())
-            {
-                var tc = BuscarHijoRecursivo(root, "TextoContadorAmigos");
-                if (tc != null) { textoContadorAmigos = tc.GetComponent<TMPro.TextMeshProUGUI>(); break; }
             }
         }
     }
@@ -224,80 +207,9 @@ public class Temporizador : MonoBehaviour
             var pv = BuscarPanelVictoriaEnEscena();
             if (pv != null) panelVictoria = pv;
         }
-        AsegurarContadorAmigos();
-        AsegurarSegmentosBoost();
         AsegurarPanelVictoria();
         AsegurarHoverBotones(panelPerder);
         AsegurarHoverBotones(panelGameOver);
-    }
-
-    // Fallback por código: crea el contador si la escena no lo trae.
-    void AsegurarContadorAmigos()
-    {
-        if (textoContadorAmigos != null) return;
-
-        Transform canvasT = null;
-        if (textoTiempo != null) canvasT = textoTiempo.transform.parent;
-        if (canvasT == null) canvasT = transform.Find("CanvasPersistente");
-
-        if (canvasT == null)
-        {
-            var canvasGO = new GameObject("CanvasPersistente");
-            canvasGO.transform.SetParent(transform, false);
-            var canvas = canvasGO.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 100;
-            canvasGO.AddComponent<GraphicRaycaster>();
-            var scaler = canvasGO.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(800f, 600f);
-            canvasT = canvasGO.transform;
-        }
-
-        var contadorGO = new GameObject("ContadorAmigos");
-        contadorGO.transform.SetParent(canvasT, false);
-        var rtContador = contadorGO.AddComponent<RectTransform>();
-        rtContador.anchorMin = new Vector2(0f, 1f);
-        rtContador.anchorMax = new Vector2(0f, 1f);
-        rtContador.anchoredPosition = new Vector2(20f, -40f);
-        rtContador.sizeDelta = new Vector2(120f, 50f);
-
-        textoContadorAmigos = contadorGO.AddComponent<TextMeshProUGUI>();
-        textoContadorAmigos.alignment = TextAlignmentOptions.Left;
-        textoContadorAmigos.fontSize = 36;
-        textoContadorAmigos.color = Color.white;
-        textoContadorAmigos.text = "0";
-    }
-
-    // Fallback por código: crea la barra de boost si la escena no la trae.
-    // Fallback por código: crea 3 segmentos si la escena no los trae.
-    void AsegurarSegmentosBoost()
-    {
-        if (segmentosBoost != null && segmentosBoost.Length > 0) return;
-
-        Transform canvasT = null;
-        if (textoTiempo != null) canvasT = textoTiempo.transform.parent;
-        if (canvasT == null) canvasT = transform.Find("CanvasPersistente");
-        if (canvasT == null) return;
-
-        segmentosBoost = new Image[3];
-        for (int i = 0; i < 3; i++)
-        {
-            var segGO = new GameObject("BoostSeg" + (i + 1));
-            segGO.transform.SetParent(canvasT, false);
-            var rt = segGO.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0f, 0f);
-            rt.anchorMax = new Vector2(0f, 0f);
-            rt.anchoredPosition = new Vector2(20f + i * 30f, 10f);
-            rt.sizeDelta = new Vector2(10f, 20f);
-            rt.pivot = new Vector2(0f, 0f);
-
-            var img = segGO.AddComponent<Image>();
-            img.color = Color.white;
-            img.type = Image.Type.Simple;
-            segmentosBoost[i] = img;
-            segGO.SetActive(false);
-        }
     }
 
     void ConstruirUIPersistente()
@@ -536,77 +448,6 @@ public class Temporizador : MonoBehaviour
                 // No forzar anchoredPosition: respeta la posición definida en la escena
             }
         }
-        // Contador de amigos: se sincroniza con Movimiento.seguidores
-        if (textoContadorAmigos != null)
-        {
-            int count = 0;
-            var mov = FindFirstObjectByType<Movimiento>();
-            if (mov != null) count = mov.seguidores.Count;
-
-            if (count != ultimoCountAmigos)
-            {
-                ultimoCountAmigos = count;
-                progresoPopAmigos = 0f;
-            }
-            progresoPopAmigos = Mathf.Min(1f, progresoPopAmigos + Time.deltaTime / 0.2f);
-
-            float popScale = 1f;
-            if (progresoPopAmigos < 1f)
-            {
-                if (progresoPopAmigos < 0.5f)
-                    popScale = Mathf.Lerp(1f, 1.3f, progresoPopAmigos / 0.5f);
-                else
-                    popScale = Mathf.Lerp(1.3f, 1f, (progresoPopAmigos - 0.5f) / 0.5f);
-            }
-            textoContadorAmigos.rectTransform.localScale = Vector3.one * popScale;
-            textoContadorAmigos.text = $"{count}";
-        }
-
-        // Barra de boost: se vacía mientras el boost está activo
-        if (barraBoost != null)
-        {
-            var mov = FindFirstObjectByType<Movimiento>();
-            if (mov != null && mov.BoostActivo)
-            {
-                barraBoost.gameObject.SetActive(true);
-                float dur = mov.BoostDuracion > 0f ? mov.BoostDuracion : 1f;
-                barraBoost.fillAmount = Mathf.Clamp01(mov.BoostTiempoRestante / dur);
-            }
-            else
-            {
-                barraBoost.gameObject.SetActive(false);
-            }
-        }
-
-        // Segmentos de boost estilo Subway Surfers
-        if (segmentosBoost != null && segmentosBoost.Length > 0)
-        {
-            var mov = FindFirstObjectByType<Movimiento>();
-            bool activo = (mov != null && mov.BoostActivo);
-            int total = segmentosBoost.Length;
-            int activos = 0;
-            if (activo)
-            {
-                float dur = mov.BoostDuracion > 0f ? mov.BoostDuracion : 1f;
-                float frac = Mathf.Clamp01(mov.BoostTiempoRestante / dur);
-                activos = Mathf.CeilToInt(frac * total);
-                if (activos < 1 && frac > 0f) activos = 1;
-                if (activos > total) activos = total;
-            }
-            for (int i = 0; i < total; i++)
-            {
-                if (segmentosBoost[i] != null)
-                    segmentosBoost[i].gameObject.SetActive(i < activos);
-            }
-            // Activar/desactivar el contenedor (padre) según si hay boost.
-            // No tocar el padre si es el Canvas (bug B1).
-            if (segmentosBoost[0] != null)
-            {
-                Transform padre = segmentosBoost[0].transform.parent;
-                if (padre != null && padre.GetComponent<Canvas>() == null)
-                    padre.gameObject.SetActive(activos > 0);
-            }
-        }
         // Temblor de cámara cuando el tiempo está bajo (8s o menos)
         var cam = FindFirstObjectByType<Camara>();
         if (cam != null)
@@ -632,25 +473,11 @@ public class Temporizador : MonoBehaviour
         var mov = FindFirstObjectByType<Movimiento>();
         if (mov != null) mov.enabled = false; // frena al dino, ya no es Morir()
         if (textoTiempo != null) textoTiempo.gameObject.SetActive(false);
-        if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(false);
+        if (hud != null) hud.Apagar();
         if (panelVictoria != null) panelVictoria.SetActive(false);
         var camGO = FindFirstObjectByType<Camara>();
         if (camGO != null) camGO.ActivarTemblor(false, 0f);
 
-        // Apagar boost (segmentos + contenedor + estado logico) al morir.
-        // No apagar el padre si es el Canvas (bug B1).
-        if (barraBoost != null) barraBoost.gameObject.SetActive(false);
-        if (segmentosBoost != null)
-        {
-            foreach (var s in segmentosBoost)
-                if (s != null) s.gameObject.SetActive(false);
-            if (segmentosBoost.Length > 0 && segmentosBoost[0] != null)
-            {
-                Transform padre = segmentosBoost[0].transform.parent;
-                if (padre != null && padre.GetComponent<Canvas>() == null)
-                    padre.gameObject.SetActive(false);
-            }
-        }
         var movMuerte = FindFirstObjectByType<Movimiento>();
         if (movMuerte != null) movMuerte.ResetearBoost();
 
@@ -682,19 +509,7 @@ public class Temporizador : MonoBehaviour
         if (mov != null) mov.enabled = false;
 
         if (textoTiempo != null) textoTiempo.gameObject.SetActive(false);
-        if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(false);
-        if (barraBoost != null) barraBoost.gameObject.SetActive(false);
-        if (segmentosBoost != null)
-        {
-            foreach (var s in segmentosBoost)
-                if (s != null) s.gameObject.SetActive(false);
-            if (segmentosBoost.Length > 0 && segmentosBoost[0] != null)
-            {
-                Transform padre = segmentosBoost[0].transform.parent;
-                if (padre != null && padre.GetComponent<Canvas>() == null)
-                    padre.gameObject.SetActive(false);
-            }
-        }
+        if (hud != null) hud.Apagar();
         if (mov != null) mov.ResetearBoost();
         if (panelGameOver != null) panelGameOver.SetActive(false);
         if (panelPerder != null) panelPerder.SetActive(false);
@@ -723,8 +538,6 @@ public class Temporizador : MonoBehaviour
         tiempoRestante = tiempoInicial;
         ultimoSegundoTick = 9;
         progresoTick = 1f;
-        ultimoCountAmigos = 0;
-        progresoPopAmigos = 1f;
         if (textoTiempo != null)
         {
             textoTiempo.gameObject.SetActive(true);
@@ -734,21 +547,7 @@ public class Temporizador : MonoBehaviour
         }
 
         // El contador de amigos y el boost se restauran siempre.
-        // Cada bloque va por su cuenta: depender del reloj los dejaba
-        // apagados para siempre si el texto del tiempo no existia.
-        if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(true);
-        if (barraBoost != null) barraBoost.gameObject.SetActive(true);
-        if (segmentosBoost != null)
-        {
-            foreach (var s in segmentosBoost)
-                if (s != null) s.gameObject.SetActive(false);
-            if (segmentosBoost.Length > 0 && segmentosBoost[0] != null)
-            {
-                Transform padre = segmentosBoost[0].transform.parent;
-                if (padre != null && padre.GetComponent<Canvas>() == null)
-                    padre.gameObject.SetActive(false);
-            }
-        }
+        if (hud != null) hud.Reiniciar();
         if (panelGameOver != null) panelGameOver.SetActive(false);
         if (panelVictoria != null) panelVictoria.SetActive(false);
         var camGO = FindFirstObjectByType<Camara>();
