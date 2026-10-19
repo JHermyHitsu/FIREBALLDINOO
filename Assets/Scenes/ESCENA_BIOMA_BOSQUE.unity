@@ -850,6 +850,7 @@ GameObject:
   m_Component:
   - component: {fileID: 331028718}
   - component: {fileID: 331028719}
+  - component: {fileID: 331028720}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -885,15 +886,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa2a752280a2a945db33373a0ae62eda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Temporizador
-  tiempoInicial: 210
+  tiempoInicial: 180
   tiempoRestante: 0
   textoTiempo: {fileID: 1037321432}
-  textoContadorAmigos: {fileID: 11367469}
-  barraBoost: {fileID: 0}
-  segmentosBoost:
-  - {fileID: 1074136504}
-  - {fileID: 1483007412}
-  - {fileID: 701688656}
   panelGameOver: {fileID: 1100136115}
   panelPerder: {fileID: 58371157}
   textoMensaje: {fileID: 0}
@@ -901,6 +896,24 @@ MonoBehaviour:
   sonidoPerder: {fileID: 8300000, guid: 33c0c5d3f51e013188d65a3970b1d20e, type: 3}
   panelVictoria: {fileID: 0}
   textoVictoria: {fileID: 0}
+--- !u!114 &331028720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 331028717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63481b71d45a3ce589f2a10d4008eca9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HUD
+  textoContadorAmigos: {fileID: 11367469}
+  barraBoost: {fileID: 2132882508}
+  segmentosBoost:
+  - {fileID: 1074136504}
+  - {fileID: 1483007412}
+  - {fileID: 701688656}
 --- !u!1001 &342993914
 PrefabInstance:
   m_ObjectHideFlags: 0
