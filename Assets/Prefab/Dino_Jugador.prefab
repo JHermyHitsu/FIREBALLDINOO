@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 2227057130314224047}
   - component: {fileID: 7001442812247158529}
   - component: {fileID: 2722247436003904672}
+  - component: {fileID: 5795681938804293424}
   m_Layer: 0
   m_Name: Dino_Jugador
   m_TagString: Player
@@ -174,11 +175,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Movimiento
   velocidad: 10
   fuerzaSalto: 14
-  animator: {fileID: 0}
   sonidoSalto: {fileID: 8300000, guid: a847d5c80e42e119495e428b872a2d6c, type: 3}
   sonidoMuerte: {fileID: 8300000, guid: ad48f6502af01f21dafa058c0d4b0179, type: 3}
   maxSeguidores: 4
   seguidores: []
+  estadoJugador: {fileID: 0}
 --- !u!95 &7001442812247158529
 Animator:
   serializedVersion: 7
@@ -298,3 +299,16 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &5795681938804293424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4374153295767282325}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3696b6984e885517082bdbe56b7e24ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EstadoJugador
+  animator: {fileID: 7001442812247158529}

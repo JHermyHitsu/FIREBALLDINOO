@@ -8,13 +8,15 @@ public class Movimiento : MonoBehaviour
     public float fuerzaSalto = 14f;
 
     [Header("Componentes Visuales y Sonido")]
-    public Animator animator;
     public AudioClip sonidoSalto;
     public AudioClip sonidoMuerte;
 
     [Header("Sistema de Vidas Extra")]
     public int maxSeguidores = 4;
     public List<DinoSeguidor> seguidores = new List<DinoSeguidor>();
+
+    // Estado del jugador (boost + animacion) vive en EstadoJugador.
+    public EstadoJugador estadoJugador;
 
     private Rigidbody2D rb;
     private AudioSource sfx;
@@ -24,10 +26,6 @@ public class Movimiento : MonoBehaviour
     private float entradaX;
     private bool estaEnSuelo = false;
     private bool vivo = true;
-    private float boostMult = 1f;
-    private float boostTiempo = 0f;
-    private float boostDuracion = 1f;
-    private float inmuneTimer = 0f;
 
     void Start()
     {
@@ -35,15 +33,16 @@ public class Movimiento : MonoBehaviour
         sfx = GetComponent<AudioSource>();
         sr = GetComponent<SpriteRenderer>();
         col = GetComponent<Collider2D>();
-        if (animator == null) animator = GetComponent<Animator>();
+
+        if (estadoJugador == null) estadoJugador = GetComponent<EstadoJugador>();
+        if (estadoJugador == null) estadoJugador = gameObject.AddComponent<EstadoJugador>();
     }
 
     void Update()
     {
         if (!vivo) return;
 
-        if (inmuneTimer > 0f)
-            inmuneTimer -= Time.deltaTime;
+        if (estadoJugador != null) estadoJugador.Tick(Time.deltaTime);
 
         entradaX = Input.GetAxisRaw("Horizontal");
 
@@ -58,19 +57,9 @@ public class Movimiento : MonoBehaviour
             if (sfx != null && sonidoSalto != null) sfx.PlayOneShot(sonidoSalto);
         }
 
-        // Temporizador de boost
-        if (boostTiempo > 0f)
-        {
-            boostTiempo -= Time.deltaTime;
-            if (boostTiempo <= 0f) boostMult = 1f;
-        }
-
-        // Animator
-        if (animator != null)
-        {
-            animator.SetFloat("Velocidad", Mathf.Abs(entradaX) * boostMult);
-            animator.SetBool("EnSuelo", estaEnSuelo);
-        }
+        // Animacion (delegada a EstadoJugador)
+        if (estadoJugador != null)
+            estadoJugador.ActualizarAnimacion(entradaX, estaEnSuelo);
 
         // Red de seguridad
         if (transform.position.y < -12f) Morir();
@@ -79,7 +68,8 @@ public class Movimiento : MonoBehaviour
     void FixedUpdate()
     {
         if (!vivo) return;
-        rb.linearVelocity = new Vector2(entradaX * velocidad * boostMult, rb.linearVelocity.y);
+        float mult = (estadoJugador != null) ? estadoJugador.BoostMult : 1f;
+        rb.linearVelocity = new Vector2(entradaX * velocidad * mult, rb.linearVelocity.y);
     }
 
     // Detección de suelo
@@ -88,27 +78,22 @@ public class Movimiento : MonoBehaviour
     private void OnCollisionExit2D(Collision2D c) { if (c.gameObject.CompareTag("SUELO")) estaEnSuelo = false; }
 
     public bool EstaEnSuelo() => estaEnSuelo;
-    public bool TieneBoost() => boostTiempo > 0f;
-
-    // Exponer estado del boost para la UI
-    public float BoostTiempoRestante => boostTiempo;
-    public bool BoostActivo => boostTiempo > 0f;
-    public float BoostDuracion => boostDuracion;
-
-    public void ActivarBoost(float multiplicador, float duracion)
-    {
-        boostMult = multiplicador;
-        boostTiempo = duracion;
-        boostDuracion = duracion;
-    }
 
     // Resetea el boost (usado al morir / reintentar) para que no quede activo.
     public void ResetearBoost()
     {
-        boostMult = 1f;
-        boostTiempo = 0f;
-        boostDuracion = 1f;
+        if (estadoJugador != null) estadoJugador.ResetearBoost();
     }
+
+    public void ActivarBoost(float multiplicador, float duracion)
+    {
+        if (estadoJugador != null) estadoJugador.ActivarBoost(multiplicador, duracion);
+    }
+
+    public bool TieneBoost() => estadoJugador != null && estadoJugador.TieneBoost();
+    public bool BoostActivo => estadoJugador != null && estadoJugador.BoostActivo;
+    public float BoostTiempoRestante => estadoJugador != null ? estadoJugador.BoostTiempoRestante : 0f;
+    public float BoostDuracion => estadoJugador != null ? estadoJugador.BoostDuracion : 1f;
 
     public bool AgregarSeguidor(DinoSeguidor amigo)
     {
@@ -133,7 +118,7 @@ public class Movimiento : MonoBehaviour
 
     public void Morir(bool esPrecipicio = false)
     {
-        if (!vivo || inmuneTimer > 0f) return;
+        if (!vivo || (estadoJugador != null && estadoJugador.Inmune)) return;
 
         // Si hay un dino de vida extra, se sacrifica y da super impulso
         if (seguidores.Count > 0)
@@ -150,7 +135,7 @@ public class Movimiento : MonoBehaviour
             if (sfx != null && sonidoSalto != null) sfx.PlayOneShot(sonidoSalto);
 
             // Ventana de inmunidad mientras el jugador sale impulsado de la zona de daño
-            inmuneTimer = 0.8f;
+            if (estadoJugador != null) estadoJugador.SetInmune(0.8f);
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, fuerzaSalto * 1.4f);
             estaEnSuelo = false;
             return;
@@ -161,11 +146,7 @@ public class Movimiento : MonoBehaviour
 
         if (sfx != null && sonidoMuerte != null) sfx.PlayOneShot(sonidoMuerte);
 
-        if (animator != null)
-        {
-            animator.SetBool("Muerto", true);
-            animator.SetTrigger("Morir");
-        }
+        if (estadoJugador != null) estadoJugador.AnimarMuerte();
 
         rb.linearVelocity = new Vector2(0f, 10f);
         if (col != null) col.enabled = false;
