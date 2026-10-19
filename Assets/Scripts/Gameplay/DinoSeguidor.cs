@@ -198,17 +198,6 @@ public class DinoSeguidor : MonoBehaviour
         Destroy(gameObject, 1.5f);
     }
 
-    public void CaerYMorir()
-    {
-        if (!reclutado) return;
-        if (lider != null)
-        {
-            lider.RemoverSeguidor(this);
-            lider = null;
-        }
-        Sacrificar();
-    }
-
     // Mantenido por compatibilidad con TransicionManager y Temporizador
     public static void LimpiarHistorial() { }
 }

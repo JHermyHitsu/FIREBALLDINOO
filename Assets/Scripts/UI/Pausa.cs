@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 // Menu de pausa activado con ESC o con el boton de menu del HUD.
-// Congela el juego (Time.timeScale = 0) y ofrece Continuar / Reiniciar / Salir.
+// Congela el juego (Time.timeScale = 0) y ofrece Continuar / Salir.
 public class Pausa : MonoBehaviour
 {
     [Tooltip("Panel de pausa (hijo del Canvas). Debe iniciar desactivado.")]
@@ -38,12 +38,6 @@ public class Pausa : MonoBehaviour
         pausado = false;
         if (panelPausa != null) panelPausa.SetActive(false);
         Time.timeScale = 1f;
-    }
-
-    public void Reiniciar()
-    {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void Salir()

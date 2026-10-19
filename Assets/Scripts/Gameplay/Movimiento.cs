@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
 public class Movimiento : MonoBehaviour
@@ -179,10 +178,5 @@ public class Movimiento : MonoBehaviour
         // El Temporizador es persistente; EnsureExists cubre el Play directo
         // en Desierto/Cueva. Reintentar vuelve siempre a Bosque.
         Temporizador.EnsureExists().MostrarGameOver(todosCaidos: true);
-    }
-
-    private void ReiniciarNivel()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

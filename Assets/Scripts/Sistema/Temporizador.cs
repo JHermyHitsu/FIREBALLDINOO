@@ -704,8 +704,6 @@ public class Temporizador : MonoBehaviour
         }
     }
 
-    public void AgregarTiempo(float seg) { if(!terminado) tiempoRestante += seg; }
-
     public void Reintentar() // vuelve siempre a Bosque con el tiempo reseteado
     {
         terminado = false;
