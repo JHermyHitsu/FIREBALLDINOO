@@ -93,16 +93,25 @@ Después reemplazar los strings hardcodeados por `Escenas.BiomaBosque` en `Comic
 
 ---
 
-### 2.5 Bypassean `TransicionManager` 🔴
+### 2.5 `ComicIntro` usa `SceneManager` directo ✅ (decisión correcta, sin cambios)
 
-**Problema:** el proyecto tiene un `TransicionManager` singleton que maneja fades, persistencia de jugador, etc. Pero `ComicIntro` llama directo a `SceneManager.LoadScene()` — sin fade, sin nada. Un corte seco del menú al juego.
+**Lo que parecía un problema no lo es.** A primera vista uno diría "el proyecto tiene `TransicionManager` y este script lo ignora". Pero al leer el código real:
 
-**Decisión:** pasar la carga de escena por `TransicionManager`. Esto te da:
-- La transición con fade que ya está hecha
-- Persistencia de jugador y seguidores si algún día el menú necesita pasar datos
-- Un solo punto que maneja escenas en todo el proyecto
+```csharp
+public void IrA(string escenaDestino, string spawnDestino)
+{
+    // ...
+    if (jugadorPersistente == null)
+    {
+        Debug.LogError("[Transicion] no hay Player en escena.");
+        yield break;   // aborta
+    }
+}
+```
 
-**NOTA:** si `TransicionManager` te genera dependencias que no querés para el menú, se puede resolver con un callback simple (`System.Action`). Pero la idea central es que el menú no llame directo a `SceneManager`.
+`TransicionManager` está diseñado para **transiciones dentro del juego**, donde ya existe un Player con `Movimiento` y una fila de seguidores que hay que reubicar. `ESCENA_MENU_INICIO` **no tiene Player**, así que usar `TransicionManager` abortaría la carga con `no hay Player en escena`.
+
+**Decisión:** se mantiene `SceneManager.LoadScene(Escenas.BiomaBosque)`. Solo se centraliza el nombre de escena, nada más.
 
 ---
 
@@ -151,7 +160,7 @@ public static class Escenas
 **Qué cambia:**
 - Sacar `Saltar()`, `Siguiente()`, `botonSkip`
 - Usar `Escenas.BiomaBosque` en vez del string hardcodeado
-- Pasar la carga por `TransicionManager` en vez de `SceneManager` directo
+- Mantener `SceneManager.LoadScene(...)` — el menú no tiene Player, `TransicionManager` aborta (ver §2.5)
 - Añadir comentarios breves y claros en cada sección
 
 **Qué queda igual:**
@@ -217,7 +226,7 @@ SceneManager.LoadScene(Escenas.MenuInicio);
 | Archivo | Acción | Motivo |
 |---------|--------|--------|
 | `Escenas.cs` | **CREAR** | Centralizar nombres de escena |
-| `ComicIntro.cs` | **REESCRIBIR** | Sacar código muerto, usar `Escenas`, usar `TransicionManager`, comentar |
+| `ComicIntro.cs` | **REESCRIBIR** | Sacar código muerto, usar `Escenas`, comentar |
 | `HoverBoton.cs` | **REESCRIBIR** | Early-out en Update, comentar |
 | `MenuInicial.cs` | **BORRAR** | Código muerto, nadie lo llama |
 | `Pausa.cs` | **EDITAR** | Reemplazar string hardcodeado por `Escenas.MenuInicio` |
@@ -248,4 +257,16 @@ Después de cada paso, verificar en Unity:
 
 ---
 
-*Documento generado el 2026-10-18. Estado: pendiente de aprobación.*
+## 7. Estado final — ✅ COMPLETADO (2026-10-18)
+
+| Paso | Estado |
+|---|---|
+| 1 — Crear `Escenas.cs` | ✅ Completado |
+| 2 — Simplificar `ComicIntro.cs` | ✅ Completado |
+| 3 — Optimizar `HoverBoton.cs` | ✅ Completado |
+| 4 — Borrar `MenuInicial.cs` | ✅ Completado |
+| 5 — `Pausa.cs` / `Temporizador.cs` | ✅ Completado |
+| 6 — Limpiar escena en Unity | ✅ Completado |
+| 7 — Verificar en Play | ✅ Botón JUGAR, comic y carga de escena funcionando |
+
+**Nota de arquitectura:** `ComicIntro` mantiene `SceneManager.LoadScene` a propósito. `TransicionManager.IrA()` aborta si no encuentra un Player, y el menú no tiene uno (ver §2.5).
