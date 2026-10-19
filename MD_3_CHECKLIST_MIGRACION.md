@@ -79,18 +79,40 @@ mkdir -p Assets/Scripts/Gameplay
 mkdir -p Assets/Scripts/Sistema
 mkdir -p Assets/Scripts/Utilidades
 
-# Mover (git mv arrastra el .meta si lo incluís)
-git mv Assets/Scripts/HoverBoton.cs Assets/Scripts/UI/HoverBoton.cs
+# Mover script Y .meta juntos (el comodín cubre ambos)
+git mv Assets/Scripts/HoverBoton.cs* Assets/Scripts/UI/
 ```
 
-**Verificar que el `.meta` se movió:**
+> ⚠️ **El `.meta` NO se arrastra solo.** `git mv archivo.cs destino/` mueve únicamente el `.cs`
+> y deja el `.meta` atrás. Por eso el comando usa el comodín `archivo.cs*`.
+>
+> Esto ya pasó una vez: `AutoDesactivar.cs` quedó sin su `.meta` en la carpeta vieja y
+> Unity habría generado un GUID nuevo, rompiendo la referencia de la escena.
+
+**Verificar que se movieron los dos:**
 
 ```bash
-ls Assets/Scripts/UI/HoverBoton.cs*
+find Assets -name "HoverBoton*" -not -path "*/Library/*"
 ```
 
-Si ves **dos** archivos (`HoverBoton.cs` y `HoverBoton.cs.meta`), está bien.
-Si ves **uno solo**, el `.meta` se quedó atrás → **deshacer y volver a hacer**.
+Debe devolver **exactamente 2 líneas**, ambas en la carpeta destino:
+```
+Assets/Scripts/UI/HoverBoton.cs
+Assets/Scripts/UI/HoverBoton.cs.meta
+```
+
+Si aparece un `HoverBoton.cs.meta` **en la carpeta vieja**, el `.meta` se quedó atrás.
+**No abras Unity todavía** — corregilo primero:
+
+```bash
+git mv Assets/Scripts/HoverBoton.cs.meta Assets/Scripts/UI/
+```
+
+**Verificar que el GUID no cambió:**
+
+```bash
+grep guid Assets/Scripts/UI/HoverBoton.cs.meta
+```
 
 ### Paso 3-6 — En Unity
 
@@ -167,6 +189,17 @@ Si ves cualquiera de estas, **revertí y avisame**. No sigas con el siguiente ar
 | El juego se pausa solo | `Time.timeScale` quedó en 0 |
 | El dinosaurio no sigue al jugador | `Movimiento` / `DinoSeguidor` desincronizados |
 | El cambio de escena no hace fade | `TransicionManager` no arrancó |
+
+### Chequeo rápido ANTES de abrir Unity
+
+Este `find` detecta el `.meta` huérfano sin necesidad de abrir el editor:
+
+```bash
+find Assets -name "NombreScript*" -not -path "*/Library/*"
+```
+
+Si devuelve más de 2 líneas, o si alguna está fuera de la carpeta destino,
+**el `.meta` se quedó atrás**. Corregilo antes de abrir Unity.
 
 ---
 

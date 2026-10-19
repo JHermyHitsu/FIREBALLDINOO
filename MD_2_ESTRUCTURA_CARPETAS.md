@@ -134,7 +134,14 @@ El inventario detectó `Assets/Editor/AutoSave.cs` (73 líneas, editor-only). **
 
 ### 8.1 El `.meta` DEBE moverse junto al `.cs`
 
-Este es **el único riesgo real**. Si movés el `.cs` sin su `.meta`:
+Este es **el único riesgo real**, y **ya ocurrió una vez** (ver MD 3 §2): `git mv archivo.cs destino/`
+mueve solo el `.cs` y deja el `.meta` atrás. La forma correcta es usar el comodín:
+
+```bash
+git mv Assets/Scripts/HoverBoton.cs* Assets/Scripts/UI/
+```
+
+Si el `.meta` se queda atrás:
 
 - Unity genera un `.meta` nuevo con GUID distinto
 - Las escenas pierden la referencia al script → **"missing script"**
