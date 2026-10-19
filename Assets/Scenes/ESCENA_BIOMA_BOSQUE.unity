@@ -852,6 +852,7 @@ GameObject:
   - component: {fileID: 331028719}
   - component: {fileID: 331028720}
   - component: {fileID: 331028721}
+  - component: {fileID: 331028722}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -887,13 +888,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa2a752280a2a945db33373a0ae62eda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Temporizador
-  panelGameOver: {fileID: 1100136115}
-  panelPerder: {fileID: 58371157}
-  textoMensaje: {fileID: 0}
-  imagenTiempoAgotado: {fileID: 0}
-  sonidoPerder: {fileID: 8300000, guid: 33c0c5d3f51e013188d65a3970b1d20e, type: 3}
-  panelVictoria: {fileID: 0}
-  textoVictoria: {fileID: 0}
 --- !u!114 &331028720
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -928,6 +922,26 @@ MonoBehaviour:
   textoTiempo: {fileID: 1037321432}
   tiempoRestante: 0
   activo: 1
+--- !u!114 &331028722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 331028717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c05f9dc6fa67d86ab2eca536d5fc12d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PanelFinPartida
+  panelGameOver: {fileID: 1100136115}
+  panelPerder: {fileID: 58371157}
+  panelVictoria: {fileID: 0}
+  textoVictoria: {fileID: 0}
+  textoMensaje: {fileID: 0}
+  imagenTiempoAgotado: {fileID: 0}
+  sonidoPerder: {fileID: 8300000, guid: 33c0c5d3f51e013188d65a3970b1d20e, type: 3}
+  terminado: 0
 --- !u!1001 &342993914
 PrefabInstance:
   m_ObjectHideFlags: 0

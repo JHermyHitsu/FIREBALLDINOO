@@ -114,7 +114,6 @@ public class Temporizador : MonoBehaviour
         {
             if (panelFinPartida.panelGameOver != null) panelFinPartida.panelGameOver.SetActive(false);
             if (panelFinPartida.panelVictoria != null) panelFinPartida.panelVictoria.SetActive(false);
-            if (panelFinPartida.imagenTiempoAgotado != null) panelFinPartida.imagenTiempoAgotado.SetActive(false);
         }
         var camGO = FindFirstObjectByType<Camara>();
         if (camGO != null) camGO.ActivarTemblor(false, 0f);

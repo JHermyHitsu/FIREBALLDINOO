@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using TMPro;
 
 /// <summary>
 /// Paneles de fin de partida (GameOver, Perder, Victoria) y su reconexion al
@@ -14,13 +13,9 @@ public class PanelFinPartida : MonoBehaviour
     [Header("Paneles")]
     public GameObject panelGameOver;
     public GameObject panelPerder;
-    public GameObject panelVictoria;
-    public TextMeshProUGUI textoVictoria;
-    public TextMeshProUGUI textoMensaje;
-    public GameObject imagenTiempoAgotado;
 
-    [Header("Sonido de Perder")]
-    public AudioClip sonidoPerder;
+    // PanelVictoria vive en la escena de Cuevas: se busca en runtime, no se serializa.
+    [System.NonSerialized] public GameObject panelVictoria;
 
     private AudioSource audioSource;
 
@@ -66,7 +61,7 @@ public class PanelFinPartida : MonoBehaviour
         return go.AddComponent<PanelFinPartida>();
     }
 
-    void AsegurarUI()
+    public void AsegurarUI()
     {
         if (audioSource == null)
         {
@@ -85,7 +80,6 @@ public class PanelFinPartida : MonoBehaviour
             if (panelGameOver != null) panelGameOver.SetActive(false);
             if (panelPerder != null) panelPerder.SetActive(false);
             if (panelVictoria != null) panelVictoria.SetActive(false);
-            if (imagenTiempoAgotado != null) imagenTiempoAgotado.SetActive(false);
         }
 
         // Reasignar PanelVictoria en la escena nueva (prioridad sobre el persistente)
@@ -94,9 +88,6 @@ public class PanelFinPartida : MonoBehaviour
         {
             if (panelVictoria != null) panelVictoria.SetActive(false);
             panelVictoria = pvEscena;
-            Transform t = panelVictoria.transform.Find("TextoVictoria");
-            if (t == null) t = panelVictoria.transform.Find("Texto_Victoria");
-            if (t != null) textoVictoria = t.GetComponent<TMPro.TextMeshProUGUI>();
         }
 
         // Reasignar PanelGameOver y PanelPerder de la escena nueva.
@@ -210,14 +201,12 @@ public class PanelFinPartida : MonoBehaviour
             if (panelGameOver != null) panelGameOver.SetActive(false);
             AsegurarHoverBotones(panelPerder);
             panelPerder.SetActive(true);
-            if (imagenTiempoAgotado != null) imagenTiempoAgotado.SetActive(false);
         }
         else if (panelGameOver != null)
         {
             if (panelPerder != null) panelPerder.SetActive(false);
             AsegurarHoverBotones(panelGameOver);
             panelGameOver.SetActive(true);
-            if (imagenTiempoAgotado != null) imagenTiempoAgotado.SetActive(true);
         }
     }
 
@@ -247,9 +236,6 @@ public class PanelFinPartida : MonoBehaviour
             if (panelVictoria != null && panelVictoria != pvEscena)
                 panelVictoria.SetActive(false);
             panelVictoria = pvEscena;
-            Transform t = panelVictoria.transform.Find("TextoVictoria");
-            if (t == null) t = panelVictoria.transform.Find("Texto_Victoria");
-            if (t != null) textoVictoria = t.GetComponent<TMPro.TextMeshProUGUI>();
         }
         if (panelVictoria != null)
         {

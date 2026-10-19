@@ -42,7 +42,7 @@ public class ItemComida : MonoBehaviour
         vecesHintMostrado++;
         hintEnPantalla = true;
 
-        Canvas canvas = FindObjectOfType<Canvas>();
+        Canvas canvas = FindFirstObjectByType<Canvas>();
         if (canvas == null || Camera.main == null)
         {
             hintEnPantalla = false;
