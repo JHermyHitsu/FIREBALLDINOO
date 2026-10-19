@@ -853,6 +853,7 @@ GameObject:
   - component: {fileID: 331028720}
   - component: {fileID: 331028721}
   - component: {fileID: 331028722}
+  - component: {fileID: 331028723}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -936,12 +937,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PanelFinPartida
   panelGameOver: {fileID: 1100136115}
   panelPerder: {fileID: 58371157}
-  panelVictoria: {fileID: 0}
-  textoVictoria: {fileID: 0}
-  textoMensaje: {fileID: 0}
-  imagenTiempoAgotado: {fileID: 0}
-  sonidoPerder: {fileID: 8300000, guid: 33c0c5d3f51e013188d65a3970b1d20e, type: 3}
   terminado: 0
+--- !u!114 &331028723
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 331028717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87f7c501ce6cc3a8fa8d7a8c558b0cf0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TransporteEscena
+  fader: {fileID: 0}
+  duracionFade: 0.35
+  transicionManager: {fileID: 0}
 --- !u!1001 &342993914
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11212,9 +11223,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 548915dbcbdb162c0b74ef00657aee2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TransicionManager
-  fader: {fileID: 2018712653}
-  duracionFade: 0.35
   separacionFila: 1.4
+  jugadorPersistente: {fileID: 0}
 --- !u!4 &1527535723
 Transform:
   m_ObjectHideFlags: 0
