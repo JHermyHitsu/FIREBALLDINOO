@@ -4,14 +4,6 @@ using UnityEngine;
 [RequireComponent(typeof(SpriteRenderer), typeof(Collider2D), typeof(Animator))]
 public class DinoSeguidor : MonoBehaviour
 {
-    [Header("Ajustes de Seguimiento Simple")]
-    [Tooltip("Distancia entre cada dinosaurio de la fila.")]
-    public float distanciaDetras = 0.75f;
-    [Tooltip("Rapidez con la que sigue al de adelante (mayor = más rápido).")]
-    public float suavizadoHorizontal = 12f;
-    [Tooltip("Ajuste de altura opcional respecto al jugador.")]
-    public float offsetVertical = 0f;
-
     [Header("Sonido")]
     [Tooltip("Efecto de sonido al morir o ser sacrificado.")]
     public AudioClip sonidoMuerte;
@@ -26,25 +18,22 @@ public class DinoSeguidor : MonoBehaviour
     private SpriteRenderer srLider;
     private Collider2D col;
     private SpriteRenderer sr;
-    private Animator animator;
     private Rigidbody2D rb;
+
+    // Matematicas de la cadena viven en FilaDinos.
+    public FilaDinos filaDinos;
 
     private int indiceFila = 0;
     private bool cayendo = false;
-    private float velocidadX = 0f;
-    private float velocidadY = 0f;
-
-    private static readonly int HashVelocidad = Animator.StringToHash("Velocidad");
-    private static readonly int HashEnSuelo = Animator.StringToHash("EnSuelo");
-    private static readonly int HashMuerto = Animator.StringToHash("Muerto");
-    private static readonly int HashMorir = Animator.StringToHash("Morir");
 
     void Awake()
     {
         col = GetComponent<Collider2D>();
         sr = GetComponent<SpriteRenderer>();
-        animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
+
+        if (filaDinos == null) filaDinos = GetComponent<FilaDinos>();
+        if (filaDinos == null) filaDinos = gameObject.AddComponent<FilaDinos>();
 
         if (Mathf.Approximately(transform.localScale.z, 0f))
         {
@@ -62,10 +51,11 @@ public class DinoSeguidor : MonoBehaviour
 
     void Start()
     {
-        if (animator != null)
+        var anim = GetComponent<Animator>();
+        if (anim != null)
         {
-            animator.SetBool(HashEnSuelo, true);
-            animator.SetFloat(HashVelocidad, 0f);
+            anim.SetBool("EnSuelo", true);
+            anim.SetFloat("Velocidad", 0f);
         }
     }
 
@@ -87,8 +77,13 @@ public class DinoSeguidor : MonoBehaviour
         reclutado = true;
         lider = jugador;
         srLider = lider.GetComponent<SpriteRenderer>();
-        velocidadX = 0f;
-        velocidadY = 0f;
+
+        if (filaDinos != null)
+        {
+            filaDinos.lider = lider;
+            filaDinos.srLider = srLider;
+            filaDinos.ResetearVelocidades();
+        }
 
         if (col != null) col.enabled = false;
         if (rb != null)
@@ -104,67 +99,9 @@ public class DinoSeguidor : MonoBehaviour
     public void AsignarIndice(int indice)
     {
         indiceFila = Mathf.Max(0, indice);
+        if (filaDinos != null) filaDinos.indiceFila = indiceFila;
         if (sr != null && srLider != null)
             sr.sortingOrder = Mathf.Max(1, srLider.sortingOrder - 1 - indiceFila);
-    }
-
-    void LateUpdate()
-    {
-        if (cayendo)
-        {
-            if (transform.position.y < -15f)
-                Destroy(gameObject);
-            return;
-        }
-
-        if (!reclutado || lider == null) return;
-
-        // 1. Seguir en cadena: el primero sigue al jugador; los demás siguen al dino de adelante
-        Transform objetivo = lider.transform;
-        if (indiceFila > 0 && indiceFila - 1 < lider.seguidores.Count)
-        {
-            DinoSeguidor anterior = lider.seguidores[indiceFila - 1];
-            if (anterior != null && anterior != this && anterior.reclutado)
-                objetivo = anterior.transform;
-        }
-
-        // 2. Calcular el punto justo detrás del objetivo actual
-        float ladoDetras = (srLider != null && srLider.flipX) ? 1f : -1f;
-        float destinoX = objetivo.position.x + (ladoDetras * distanciaDetras);
-        float destinoY = objetivo.position.y + (objetivo == lider.transform ? offsetVertical : 0f);
-
-        // 3. Moverse suavemente hacia ese punto (crea el efecto ola en cadena de forma natural)
-        float tiempoSuaveX = 1f / Mathf.Max(1f, suavizadoHorizontal);
-        float tiempoSuaveY = 0.055f;
-
-        float nuevoX = Mathf.SmoothDamp(transform.position.x, destinoX, ref velocidadX, tiempoSuaveX);
-        float nuevoY = Mathf.SmoothDamp(transform.position.y, destinoY, ref velocidadY, tiempoSuaveY);
-
-        transform.position = new Vector3(nuevoX, nuevoY, transform.position.z);
-
-        // 4. Mirar hacia donde camina; al frenar, mirar igual que el líder
-        if (sr != null)
-        {
-            if (Mathf.Abs(velocidadX) > 0.25f)
-                sr.flipX = velocidadX < 0f;
-            else if (srLider != null)
-                sr.flipX = srLider.flipX;
-        }
-
-        // 5. Animación simple de caminar y correr (con boost de carne)
-        if (animator != null)
-        {
-            bool enMovimiento = Mathf.Abs(velocidadX) > 0.2f;
-            float valorVelocidad = 0f;
-            if (enMovimiento)
-            {
-                valorVelocidad = (lider != null && lider.TieneBoost()) ? 1.5f : 1f;
-            }
-            bool enSuelo = Mathf.Abs(velocidadY) < 1.2f && lider.EstaEnSuelo();
-
-            animator.SetFloat(HashVelocidad, valorVelocidad);
-            animator.SetBool(HashEnSuelo, enSuelo);
-        }
     }
 
     public void Sacrificar()
@@ -172,6 +109,7 @@ public class DinoSeguidor : MonoBehaviour
         if (cayendo) return;
         cayendo = true;
         reclutado = false;
+        if (filaDinos != null) filaDinos.cayendo = true;
 
         if (col != null) col.enabled = false;
 
@@ -187,12 +125,13 @@ public class DinoSeguidor : MonoBehaviour
         rb.gravityScale = 2f;
         rb.linearVelocity = new Vector2(0f, 10f);
 
-        if (animator != null)
+        var anim = GetComponent<Animator>();
+        if (anim != null)
         {
-            animator.SetBool(HashEnSuelo, false);
-            animator.SetFloat(HashVelocidad, 0f);
-            animator.SetBool(HashMuerto, true);
-            animator.SetTrigger(HashMorir);
+            anim.SetBool("EnSuelo", false);
+            anim.SetFloat("Velocidad", 0f);
+            anim.SetBool("Muerto", true);
+            anim.SetTrigger("Morir");
         }
 
         Destroy(gameObject, 1.5f);

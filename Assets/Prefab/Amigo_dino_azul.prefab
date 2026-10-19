@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 3088174688232166874}
   - component: {fileID: 5731895711176291454}
   - component: {fileID: 4260903305488860864}
+  - component: {fileID: -660817380962665211}
   m_Layer: 0
   m_Name: Amigo_dino_azul
   m_TagString: Untagged
@@ -193,9 +194,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f2bb92b29fce6fdabb4cb5093e63ec6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DinoSeguidor
-  distanciaDetras: 0.75
-  suavizadoHorizontal: 14
-  offsetVertical: 0
+  sonidoMuerte: {fileID: 8300000, guid: ad48f6502af01f21dafa058c0d4b0179, type: 3}
   reclutado: 0
   pasosSeparacion: 8
-  sonidoMuerte: {fileID: 8300000, guid: ad48f6502af01f21dafa058c0d4b0179, type: 3}
+  filaDinos: {fileID: 0}
+--- !u!114 &-660817380962665211
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9112554365290563677}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7cb945d46aa76f3e88c3c40e29822b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FilaDinos
+  distanciaDetras: 0.75
+  suavizadoHorizontal: 12
+  offsetVertical: 0
+  pasosSeparacion: 8
+  indiceFila: 0
+  cayendo: 0
+  lider: {fileID: 0}
+  srLider: {fileID: 0}

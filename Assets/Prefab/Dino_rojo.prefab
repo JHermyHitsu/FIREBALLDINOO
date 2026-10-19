@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8376126719784459719}
   - component: {fileID: 6447701546630763230}
   - component: {fileID: 3123594981758507679}
+  - component: {fileID: -1746936092922252280}
   m_Layer: 0
   m_Name: Dino_rojo
   m_TagString: Untagged
@@ -202,8 +203,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f2bb92b29fce6fdabb4cb5093e63ec6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DinoSeguidor
+  sonidoMuerte: {fileID: 0}
+  reclutado: 0
+  pasosSeparacion: 8
+  filaDinos: {fileID: 0}
+--- !u!114 &-1746936092922252280
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2301581858111617759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7cb945d46aa76f3e88c3c40e29822b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FilaDinos
   distanciaDetras: 0.75
   suavizadoHorizontal: 12
   offsetVertical: 0
-  reclutado: 0
   pasosSeparacion: 8
+  indiceFila: 0
+  cayendo: 0
+  lider: {fileID: 0}
+  srLider: {fileID: 0}
