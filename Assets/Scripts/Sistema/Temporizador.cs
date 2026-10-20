@@ -1,18 +1,18 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using TMPro;
 
-// Reloj global + pantalla de Game Over.
-// El GameObject es persistente (DontDestroyOnLoad) junto con su Canvas hijo,
-// por eso el panel funciona en Bosque, Desierto y Cueva.
-// "Reintentar" vuelve siempre a ESCENA_BIOMA_BOSQUE con el tiempo reseteado.
+/// <summary>
+/// GameManager / Coordinador del ciclo de vida de la partida.
+/// El GameObject es persistente (DontDestroyOnLoad) y orquesta:
+/// - Reloj: conteo regresivo y alerta de pánico (delegado a Reloj.cs).
+/// - HUD: contador de dinos y barra de boost (delegado a HUD.cs).
+/// - Fin de partida: paneles GameOver/Victoria (delegado a PanelFinPartida.cs).
+/// - Flujo de sesión: Reintentar (reseteo a Bosque) y Salir (menú principal).
+/// </summary>
 public class Temporizador : MonoBehaviour
 {
     public static Temporizador Instance;
     public const string EscenaBosque = "ESCENA_BIOMA_BOSQUE";
-    // Nombre canónico del panel de Game Over. En Bosque la escena lo llama
-    // "PanelGamerOver" (con r); se acepta como alias para no romper.
-    public const string NombrePanelGameOver = "PanelGameOver";
 
     // Referencias a los componentes hermanos (viven en el mismo GameManager).
     // No serializados: se resuelven en runtime en Awake.
@@ -105,6 +105,7 @@ public class Temporizador : MonoBehaviour
 
     public void Reintentar() // vuelve siempre a Bosque con el tiempo reseteado
     {
+        Time.timeScale = 1f;
         if (panelFinPartida != null) panelFinPartida.terminado = false;
 
         // El reloj y el HUD se restauran siempre.
