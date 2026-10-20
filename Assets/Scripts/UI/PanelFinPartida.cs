@@ -17,6 +17,10 @@ public class PanelFinPartida : MonoBehaviour
     // PanelVictoria vive en la escena de Cuevas: se busca en runtime, no se serializa.
     [System.NonSerialized] public GameObject panelVictoria;
 
+    [Header("Audio")]
+    public AudioClip musicaPerder;
+    public AudioClip musicaVictoria;
+
     private AudioSource audioSource;
 
     // Estado de la partida
@@ -77,6 +81,7 @@ public class PanelFinPartida : MonoBehaviour
         // Si se vuelve a una escena sin haber terminado, ningún panel debe quedar visible.
         if (!terminado)
         {
+            if (audioSource != null && audioSource.isPlaying) audioSource.Stop();
             if (panelGameOver != null) panelGameOver.SetActive(false);
             if (panelPerder != null) panelPerder.SetActive(false);
             if (panelVictoria != null) panelVictoria.SetActive(false);
@@ -194,19 +199,21 @@ public class PanelFinPartida : MonoBehaviour
         var camGO = FindFirstObjectByType<Camara>();
         if (camGO != null) camGO.ActivarTemblor(false, 0f);
 
-        // Apagar boost (segmentos) — ya cubierto por hud.Apagar().
+        DetenerMusicaAmbiente();
 
         if (todosCaidos && panelPerder != null)
         {
             if (panelGameOver != null) panelGameOver.SetActive(false);
             AsegurarHoverBotones(panelPerder);
             panelPerder.SetActive(true);
+            ReproducirMusica(musicaPerder);
         }
         else if (panelGameOver != null)
         {
             if (panelPerder != null) panelPerder.SetActive(false);
             AsegurarHoverBotones(panelGameOver);
             panelGameOver.SetActive(true);
+            ReproducirMusica(musicaPerder);
         }
     }
 
@@ -226,6 +233,9 @@ public class PanelFinPartida : MonoBehaviour
 
         if (mov != null) mov.ResetearBoost();
 
+        DetenerMusicaAmbiente();
+        ReproducirMusica(musicaVictoria);
+
         if (panelGameOver != null) panelGameOver.SetActive(false);
         if (panelPerder != null) panelPerder.SetActive(false);
 
@@ -244,9 +254,32 @@ public class PanelFinPartida : MonoBehaviour
         }
     }
 
+    void DetenerMusicaAmbiente()
+    {
+        AudioSource[] fuentes = FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
+        foreach (var a in fuentes)
+        {
+            if (a != null && a != audioSource && a.loop && a.isPlaying)
+            {
+                a.Stop();
+            }
+        }
+    }
+
+    void ReproducirMusica(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+        {
+            audioSource.clip = clip;
+            audioSource.loop = false;
+            audioSource.Play();
+        }
+    }
+
     // Botones de los paneles delegan al Temporizador (Reintentar/Salir).
     void OnReintentar()
     {
+        if (audioSource != null && audioSource.isPlaying) audioSource.Stop();
         var t = FindFirstObjectByType<Temporizador>();
         if (t != null) t.Reintentar();
     }

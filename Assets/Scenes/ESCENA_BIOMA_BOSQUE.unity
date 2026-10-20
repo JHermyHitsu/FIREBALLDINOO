@@ -937,6 +937,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PanelFinPartida
   panelGameOver: {fileID: 1100136115}
   panelPerder: {fileID: 58371157}
+  musicaPerder: {fileID: 8300000, guid: 33c0c5d3f51e013188d65a3970b1d20e, type: 3}
+  musicaVictoria: {fileID: 8300000, guid: a75556701c0d9b58298f3ac58c052d67, type: 3}
   terminado: 0
 --- !u!114 &331028723
 MonoBehaviour:
@@ -11224,7 +11226,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TransicionManager
   separacionFila: 1.4
-  jugadorPersistente: {fileID: 0}
+  persistenciaJugador: {fileID: 0}
 --- !u!4 &1527535723
 Transform:
   m_ObjectHideFlags: 0
