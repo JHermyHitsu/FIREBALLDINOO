@@ -111,7 +111,10 @@ public class DinoSeguidor : MonoBehaviour
 
         if (col != null) col.enabled = false;
 
-        AudioClip clip = sonidoMuerte != null ? sonidoMuerte : (lider != null ? lider.sonidoMuerte : null);
+        AudioClip clipMuerteLider = (lider != null && lider.saludYMuerte != null && lider.saludYMuerte.sonidoMuerte != null) 
+            ? lider.saludYMuerte.sonidoMuerte 
+            : (lider != null ? lider.sonidoMuerte : null);
+        AudioClip clip = sonidoMuerte != null ? sonidoMuerte : clipMuerteLider;
         if (clip != null)
         {
             Vector3 posAudio = Camera.main != null ? Camera.main.transform.position : transform.position;

@@ -8,6 +8,7 @@ public class SistemaSaludyMuerte : MonoBehaviour
 {
     public Movimiento movimiento;
     public EstadoJugador estadoJugador;
+    public AudioClip sonidoMuerte;
 
     private Rigidbody2D rb;
     private Collider2D col;
@@ -25,6 +26,9 @@ public class SistemaSaludyMuerte : MonoBehaviour
         col = GetComponent<Collider2D>();
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
+
+        if (sonidoMuerte == null && movimiento != null)
+            sonidoMuerte = movimiento.sonidoMuerte;
     }
 
     public void Morir()
@@ -58,8 +62,9 @@ public class SistemaSaludyMuerte : MonoBehaviour
         // Muerte real
         vivo = false;
 
-        if (audioSource != null && movimiento != null && movimiento.sonidoMuerte != null)
-            audioSource.PlayOneShot(movimiento.sonidoMuerte);
+        AudioClip clip = sonidoMuerte != null ? sonidoMuerte : (movimiento != null ? movimiento.sonidoMuerte : null);
+        if (audioSource != null && clip != null)
+            audioSource.PlayOneShot(clip);
 
         if (estadoJugador != null) estadoJugador.AnimarMuerte();
 
