@@ -73,7 +73,7 @@ public class SistemaSaludyMuerte : MonoBehaviour
 
         if (movimiento != null) movimiento.ResetearBoost();
 
-        Invoke(nameof(MostrarBotonMuerte), 1.5f);
+        PanelFinPartida.EnsureExists().MostrarGameOverConRetardo(todosCaidos: true, 1.5f);
     }
 
     void MostrarBotonMuerte()

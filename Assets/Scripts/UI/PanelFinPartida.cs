@@ -72,6 +72,8 @@ public class PanelFinPartida : MonoBehaviour
             audioSource = GetComponent<AudioSource>();
             if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
         }
+        ResolverPanelPerder();
+        ResolverPanelGameOver();
         AsegurarHoverBotones(panelGameOver);
         AsegurarHoverBotones(panelPerder);
     }
@@ -201,20 +203,70 @@ public class PanelFinPartida : MonoBehaviour
 
         DetenerMusicaAmbiente();
 
-        if (todosCaidos && panelPerder != null)
+        var panelP = ResolverPanelPerder();
+        var panelGO = ResolverPanelGameOver();
+
+        if (todosCaidos && panelP != null)
         {
-            if (panelGameOver != null) panelGameOver.SetActive(false);
-            AsegurarHoverBotones(panelPerder);
-            panelPerder.SetActive(true);
+            if (panelGO != null) panelGO.SetActive(false);
+            ActivarAncestros(panelP);
+            AsegurarHoverBotones(panelP);
+            panelP.SetActive(true);
             ReproducirMusica(musicaPerder);
         }
-        else if (panelGameOver != null)
+        else if (panelGO != null)
         {
-            if (panelPerder != null) panelPerder.SetActive(false);
-            AsegurarHoverBotones(panelGameOver);
-            panelGameOver.SetActive(true);
+            if (panelP != null) panelP.SetActive(false);
+            ActivarAncestros(panelGO);
+            AsegurarHoverBotones(panelGO);
+            panelGO.SetActive(true);
             ReproducirMusica(musicaPerder);
         }
+    }
+
+    public void MostrarGameOverConRetardo(bool todosCaidos, float retardo)
+    {
+        StartCoroutine(MostrarGameOverRutina(todosCaidos, retardo));
+    }
+
+    System.Collections.IEnumerator MostrarGameOverRutina(bool todosCaidos, float retardo)
+    {
+        yield return new WaitForSeconds(retardo);
+        MostrarGameOver(todosCaidos);
+    }
+
+    GameObject ResolverPanelPerder()
+    {
+        if (panelPerder != null) return panelPerder;
+
+        var encontrado = BuscarHijoRecursivo(gameObject, "PanelPerder");
+        if (encontrado != null) { panelPerder = encontrado; return panelPerder; }
+
+        foreach (var canvas in FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            encontrado = BuscarHijoRecursivo(canvas.gameObject, "PanelPerder");
+            if (encontrado != null) { panelPerder = encontrado; return panelPerder; }
+        }
+
+        return null;
+    }
+
+    GameObject ResolverPanelGameOver()
+    {
+        if (panelGameOver != null) return panelGameOver;
+
+        var encontrado = BuscarHijoRecursivo(gameObject, NombrePanelGameOver);
+        if (encontrado == null) encontrado = BuscarHijoRecursivo(gameObject, "PanelGamerOver");
+        if (encontrado != null) { panelGameOver = encontrado; return panelGameOver; }
+
+        foreach (var canvas in FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            encontrado = BuscarHijoRecursivo(canvas.gameObject, NombrePanelGameOver);
+            if (encontrado == null) encontrado = BuscarHijoRecursivo(canvas.gameObject, "PanelGamerOver");
+            if (encontrado != null) { panelGameOver = encontrado; return panelGameOver; }
+        }
+
+        return null;
     }
 
     public void MostrarVictoria()
