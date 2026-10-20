@@ -418,10 +418,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ComicIntro
   imagenIntro: {fileID: 1124095408}
   imagenes:
-  - {fileID: -3584388909342707737, guid: e490dac42a2462457a62c137f96104b0, type: 3}
-  - {fileID: 6032079875331081533, guid: 0c9838f20cde6d94387d96bdfd6d690d, type: 3}
-  - {fileID: -1201519295121979567, guid: 4888863e4c1ce2d1daadc688195ca2ee, type: 3}
+  - {fileID: 3252056499628467819, guid: 96e05566f23cc5d13906852d00f4ab71, type: 3}
+  - {fileID: 1221922418414843456, guid: 8dd2259d668cce2209e67a33ba5e0a6f, type: 3}
+  - {fileID: 7153990971356190536, guid: a4a24debe0a6f3af7b844e2fd7668930, type: 3}
   - {fileID: -3837395233606504902, guid: 42d925038a19e1ce2b3e60011c212b8e, type: 3}
+  - {fileID: -8407562470335492719, guid: 9e4780a60ed94fa658b0bb287ab5876c, type: 3}
+  - {fileID: -7557765850615683847, guid: db0deffef3b4b212cbb869b7a02473f7, type: 3}
   tiempoPorImagen: 3
   botonJugar: {fileID: 685923656}
 --- !u!1 &941121852
