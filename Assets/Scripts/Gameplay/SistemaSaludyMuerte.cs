@@ -27,7 +27,7 @@ public class SistemaSaludyMuerte : MonoBehaviour
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
     }
 
-    public void Morir(bool esPrecipicio = false)
+    public void Morir()
     {
         if (!vivo) return;
         if (estadoJugador != null && estadoJugador.Inmune) return;

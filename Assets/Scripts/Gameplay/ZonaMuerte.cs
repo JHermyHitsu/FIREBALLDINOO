@@ -21,7 +21,7 @@ public class ZonaMuerte : MonoBehaviour
         {
             Movimiento dino = otro.GetComponent<Movimiento>();
             if (dino != null)
-                dino.Morir(esPrecipicio: true);
+                dino.Morir();
         }
     }
 }

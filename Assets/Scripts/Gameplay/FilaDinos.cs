@@ -14,8 +14,6 @@ public class FilaDinos : MonoBehaviour
     [Tooltip("Ajuste de altura opcional respecto al jugador.")]
     public float offsetVertical = 0f;
 
-    // Mantenido para compatibilidad con el Inspector del Prefab
-    [HideInInspector] public int pasosSeparacion = 8;
 
     // Estado compartido con DinoSeguidor (se asigna desde ahi)
     [HideInInspector] public int indiceFila = 0;
@@ -41,12 +39,6 @@ public class FilaDinos : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         dinoSeguidor = GetComponent<DinoSeguidor>();
 
-        if (Mathf.Approximately(transform.localScale.z, 0f))
-        {
-            Vector3 s = transform.localScale;
-            s.z = 1f;
-            transform.localScale = s;
-        }
     }
 
     public bool Reclutado => dinoSeguidor != null && dinoSeguidor.reclutado;

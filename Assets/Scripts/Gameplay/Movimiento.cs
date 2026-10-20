@@ -116,8 +116,8 @@ public class Movimiento : MonoBehaviour
         if (controladorFila != null) controladorFila.RemoverSeguidor(amigo);
     }
 
-    public void Morir(bool esPrecipicio = false)
+    public void Morir()
     {
-        if (saludYMuerte != null) saludYMuerte.Morir(esPrecipicio);
+        if (saludYMuerte != null) saludYMuerte.Morir();
     }
 }

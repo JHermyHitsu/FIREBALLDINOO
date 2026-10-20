@@ -11,8 +11,6 @@ public class DinoSeguidor : MonoBehaviour
     [Header("Estado")]
     public bool reclutado = false;
 
-    // Mantenido para compatibilidad con el Inspector del Prefab
-    [HideInInspector] public int pasosSeparacion = 8;
 
     private Movimiento lider;
     private SpriteRenderer srLider;
