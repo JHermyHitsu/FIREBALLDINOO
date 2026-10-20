@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 
 // Manager único que controla los cambios de escena caminando.
 // Vive entre escenas (DontDestroyOnLoad) y es el ÚNICO que debería llamar a SceneManager.
@@ -15,13 +14,23 @@ public class TransicionManager : MonoBehaviour
     [Tooltip("Cuántos metros detrás del jugador aparecen los seguidores al llegar.")]
     public float separacionFila = 0.7f;
 
-    public bool EnTransicion { get; set; }
+    // Persistencia del jugador vive en PersistenciaJugador (hermano).
+    public PersistenciaJugador persistenciaJugador;
+
+    // Delegados a PersistenciaJugador para compatibilidad con TransporteEscena.
+    public GameObject jugadorPersistente
+    {
+        get => persistenciaJugador != null ? persistenciaJugador.jugadorPersistente : null;
+        set { if (persistenciaJugador != null) persistenciaJugador.jugadorPersistente = value; }
+    }
+    public List<DinoSeguidor> filaViajera => persistenciaJugador != null ? persistenciaJugador.filaViajera : null;
+    public bool EnTransicion
+    {
+        get => persistenciaJugador != null && persistenciaJugador.EnTransicion;
+        set { if (persistenciaJugador != null) persistenciaJugador.EnTransicion = value; }
+    }
 
     const string NombreEventSystem = "EventSystem_Persistente";
-
-    // Jugador y seguidores que viajan entre escenas.
-    public GameObject jugadorPersistente;
-    public readonly List<DinoSeguidor> filaViajera = new List<DinoSeguidor>();
 
     void Awake()
     {
@@ -34,13 +43,10 @@ public class TransicionManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        jugadorPersistente = GameObject.FindGameObjectWithTag("Player");
-        if (jugadorPersistente != null)
-            DontDestroyOnLoad(jugadorPersistente);
+        if (persistenciaJugador == null) persistenciaJugador = GetComponent<PersistenciaJugador>();
+        if (persistenciaJugador == null) persistenciaJugador = gameObject.AddComponent<PersistenciaJugador>();
 
         AsegurarEventSystem();
-
-        SceneManager.sceneLoaded += AlCargarEscena;
     }
 
     // Devuelve el manager persistente; lo crea si la escena no trae uno
@@ -57,7 +63,7 @@ public class TransicionManager : MonoBehaviour
     // El EventSystem de Bosque (con su InputSystemUIInputModule ya configurado)
     // viaja entre escenas; sin él los botones del Game Over no responden en
     // Desierto/Cueva, que no traen EventSystem propio.
-    void AsegurarEventSystem()
+    public void AsegurarEventSystem()
     {
         var sistemas = FindObjectsByType<EventSystem>(FindObjectsSortMode.None);
         EventSystem nuestro = null;
@@ -96,58 +102,6 @@ public class TransicionManager : MonoBehaviour
     // Fader mínimo por código; solo se usa si el manager se creó sin escena (sin Bosque).
     void OnDestroy()
     {
-        if (Instance == this)
-            SceneManager.sceneLoaded -= AlCargarEscena;
-    }
-
-    // Evita jugadores duplicados:
-    // - En transición: gana el jugador viajero, se destruye el que traiga la escena nueva.
-    // - Sin transición (muerte y reinicio): se adopta el jugador fresco de la escena
-    //   y se destruye la fila vieja para empezar limpio.
-    void AlCargarEscena(Scene escena, LoadSceneMode modo)
-    {
-        AsegurarEventSystem();
-
-        GameObject[] jugadores = GameObject.FindGameObjectsWithTag("Player");
-        if (jugadores.Length <= 1)
-        {
-            if (jugadores.Length == 1 && jugadorPersistente == null)
-            {
-                jugadorPersistente = jugadores[0];
-                DontDestroyOnLoad(jugadorPersistente);
-            }
-            return;
-        }
-
-        if (EnTransicion && jugadorPersistente != null)
-        {
-            foreach (GameObject j in jugadores)
-                if (j != jugadorPersistente)
-                    Destroy(j);
-        }
-        else
-        {
-            foreach (DinoSeguidor s in filaViajera)
-                if (s != null)
-                    Destroy(s.gameObject);
-            filaViajera.Clear();
-
-            // Intercambio al jugador fresco de la escena. Se elige explícitamente
-            // uno distinto al viejo: adoptar jugadores[0] a ciegas podía quedarse
-            // con el cadáver recién destruido (p. ej. reintentar tras morir).
-            GameObject viejo = jugadorPersistente;
-            GameObject nuevo = null;
-            foreach (GameObject j in jugadores)
-                if (j != null && j != viejo) { nuevo = j; break; }
-
-            if (viejo != null)
-                Destroy(viejo);
-
-            jugadorPersistente = nuevo;
-            if (jugadorPersistente == null)
-                jugadorPersistente = GameObject.FindGameObjectWithTag("Player");
-            if (jugadorPersistente != null)
-                DontDestroyOnLoad(jugadorPersistente);
-        }
+        if (Instance == this) Instance = null;
     }
 }
