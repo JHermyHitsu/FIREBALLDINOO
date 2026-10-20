@@ -20,6 +20,9 @@ public class Temporizador : MonoBehaviour
     Reloj reloj;
     PanelFinPartida panelFinPartida;
 
+    // Controlador de la imagen final (responsabilidad unica).
+    ImagenFinalController imagenFinalController;
+
     void Awake()
     {
         if (Instance != null) { Destroy(gameObject); return; }
@@ -36,6 +39,9 @@ public class Temporizador : MonoBehaviour
 
         reloj = GetComponent<Reloj>();
         if (reloj == null) reloj = gameObject.AddComponent<Reloj>();
+
+        imagenFinalController = GetComponent<ImagenFinalController>();
+        if (imagenFinalController == null) imagenFinalController = gameObject.AddComponent<ImagenFinalController>();
 
         AsegurarUI();
 
@@ -82,11 +88,14 @@ public class Temporizador : MonoBehaviour
                 cam.ActivarTemblor(false, 0f);
         }
 
-        if (reloj != null && reloj.TiempoRestante <= 0f)
+        if (reloj != null && reloj.TiempoRestante <= 0f && (imagenFinalController == null || !imagenFinalController.EstaMostrando))
         {
             reloj.Pausar();
             reloj.Apagar();
-            MostrarGameOver();
+            if (imagenFinalController != null)
+                imagenFinalController.Iniciar(() => MostrarGameOver());
+            else
+                MostrarGameOver();
         }
     }
 
@@ -95,6 +104,8 @@ public class Temporizador : MonoBehaviour
         AsegurarUI();
         if (panelFinPartida != null) panelFinPartida.MostrarGameOver(todosCaidos);
     }
+
+
 
     public void MostrarVictoria()
     {
@@ -106,6 +117,7 @@ public class Temporizador : MonoBehaviour
     public void Reintentar() // vuelve siempre a Bosque con el tiempo reseteado
     {
         Time.timeScale = 1f;
+        if (imagenFinalController != null) imagenFinalController.Detener();
         if (panelFinPartida != null) panelFinPartida.terminado = false;
 
         // El reloj y el HUD se restauran siempre.
