@@ -32,8 +32,7 @@ public class TransporteEscena : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        if (transicionManager == null) transicionManager = GetComponent<TransicionManager>();
-        if (transicionManager == null) transicionManager = gameObject.AddComponent<TransicionManager>();
+        if (transicionManager == null) transicionManager = TransicionManager.EnsureExists();
 
         if (fader == null) CrearFader();
     }
@@ -78,6 +77,11 @@ public class TransporteEscena : MonoBehaviour
             yield break;
         }
         transicionManager.jugadorPersistente = jugadorPersistente;
+
+        // Asegurar persistencia del jugador ANTES de descargar la escena actual.
+        // Se desvincula de cualquier padre para que DontDestroyOnLoad funcione siempre.
+        jugadorPersistente.transform.SetParent(null);
+        DontDestroyOnLoad(jugadorPersistente);
 
         Movimiento mov = jugadorPersistente.GetComponent<Movimiento>();
         Rigidbody2D rb = jugadorPersistente.GetComponent<Rigidbody2D>();
@@ -128,6 +132,8 @@ public class TransporteEscena : MonoBehaviour
             yield return null;
         op.allowSceneActivation = true;
         yield return null;
+
+        if (transicionManager != null) transicionManager.AsegurarEventSystem();
 
         // 4. Buscar el spawn. Si no existe, abortar con fade de emergencia
         //    (nunca teleportar al 0,0,0).

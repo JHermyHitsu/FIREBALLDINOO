@@ -60,46 +60,36 @@ public class TransicionManager : MonoBehaviour
         return go.AddComponent<TransicionManager>();
     }
 
-    // El EventSystem de Bosque (con su InputSystemUIInputModule ya configurado)
-    // viaja entre escenas; sin él los botones del Game Over no responden en
-    // Desierto/Cueva, que no traen EventSystem propio.
+    // Asegura que siempre haya un EventSystem activo en la escena actual
+    // (p. ej. Desierto que no trae EventSystem propio en su jerarquía).
+    // No usamos DontDestroyOnLoad para evitar colisiones ("There can be only one active Event System")
+    // con escenas que ya traen su propio EventSystem (Bosque, Cuevas, Menú).
     public void AsegurarEventSystem()
     {
         var sistemas = FindObjectsByType<EventSystem>(FindObjectsSortMode.None);
-        EventSystem nuestro = null;
-        foreach (var s in sistemas)
-            if (s != null && s.gameObject.name == NombreEventSystem) { nuestro = s; break; }
-
-        if (nuestro == null)
+        if (sistemas == null || sistemas.Length == 0)
         {
-            foreach (var s in sistemas)
-            {
-                if (s == null) continue;
-                nuestro = s;
-                nuestro.gameObject.name = NombreEventSystem;
-                DontDestroyOnLoad(nuestro.gameObject);
-                break;
-            }
-            if (nuestro == null)
-                nuestro = CrearEventSystem();
+            CrearEventSystem();
+            return;
         }
 
-        // Elimina duplicados de escena (p. ej. el EventSystem fresco de Bosque al volver).
-        foreach (var s in sistemas)
-            if (s != null && s != nuestro)
+        // Si por alguna razón hubiera más de uno activo en la misma escena, eliminar duplicados
+        for (int i = 1; i < sistemas.Length; i++)
+        {
+            if (sistemas[i] != null)
             {
-                s.gameObject.SetActive(false);
-                Destroy(s.gameObject);
+                sistemas[i].gameObject.SetActive(false);
+                Destroy(sistemas[i].gameObject);
             }
+        }
     }
 
     EventSystem CrearEventSystem()
     {
         var go = new GameObject(NombreEventSystem);
-        go.AddComponent<EventSystem>();
+        var es = go.AddComponent<EventSystem>();
         go.AddComponent<StandaloneInputModule>();
-        DontDestroyOnLoad(go);
-        return go.GetComponent<EventSystem>();
+        return es;
     }
 
     // Fader mínimo por código; solo se usa si el manager se creó sin escena (sin Bosque).
