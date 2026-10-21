@@ -141,6 +141,21 @@ public class TransporteEscena : MonoBehaviour
             yield break;
         }
 
+        // Destroy duplicate recruited followers that did not travel (orphans from the new scene).
+        // Scene-native dinos (reclutado = false) must be left alive.
+        foreach (var s in FindObjectsByType<DinoSeguidor>(FindObjectsSortMode.None))
+        {
+            if (s != null && s.reclutado && !filaViajera.Contains(s))
+                Destroy(s.gameObject);
+        }
+
+        // Limpiar referencias destruidas de filaViajera.
+        for (int i = filaViajera.Count - 1; i >= 0; i--)
+        {
+            if (filaViajera[i] == null)
+                filaViajera.RemoveAt(i);
+        }
+
         // 5. Colocar jugador + fila mirando a la derecha (se sigue corriendo).
         if (jugadorPersistente == null)
         {
