@@ -46,12 +46,33 @@ public class Temporizador : MonoBehaviour
         AsegurarUI();
 
         // PanelFinPartida se suscribe a sceneLoaded por su cuenta.
+        SceneManager.sceneLoaded += AlCargarEscena;
     }
 
     void OnDestroy()
     {
+        SceneManager.sceneLoaded -= AlCargarEscena;
         if (Instance == this)
             Instance = null;
+    }
+
+    void AlCargarEscena(Scene escena, LoadSceneMode modo)
+    {
+        // Al volver al bosque (inicio de partida), resetear estado para que el
+        // temporizador arranque de cero y los paneles no queden bloqueados.
+        if (escena.name == EscenaBosque)
+        {
+            if (panelFinPartida != null) panelFinPartida.terminado = false;
+            if (reloj != null) reloj.Reiniciar();
+            if (hud != null) hud.Reiniciar();
+            if (panelFinPartida != null)
+            {
+                if (panelFinPartida.panelGameOver != null) panelFinPartida.panelGameOver.SetActive(false);
+                if (panelFinPartida.panelPerder != null) panelFinPartida.panelPerder.SetActive(false);
+                if (panelFinPartida.panelVictoria != null) panelFinPartida.panelVictoria.SetActive(false);
+            }
+            if (imagenFinalController != null) imagenFinalController.Detener();
+        }
     }
 
     // Devuelve el Temporizador persistente; lo crea si la escena no trae uno
