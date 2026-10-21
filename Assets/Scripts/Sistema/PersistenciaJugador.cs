@@ -62,6 +62,7 @@ public class PersistenciaJugador : MonoBehaviour
     public static void SalirAlMenu()
     {
         Time.timeScale = 1f;
+        Pausa.EstaPausado = false;
         foreach (var a in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
             if (a != null && a.isPlaying) a.Stop();
 

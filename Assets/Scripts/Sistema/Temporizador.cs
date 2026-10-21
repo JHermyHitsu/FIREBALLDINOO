@@ -62,6 +62,7 @@ public class Temporizador : MonoBehaviour
         // temporizador arranque de cero y los paneles no queden bloqueados.
         if (escena.name == EscenaBosque)
         {
+            Pausa.EstaPausado = false;
             if (panelFinPartida != null) panelFinPartida.terminado = false;
             if (reloj != null) reloj.Reiniciar();
             if (hud != null) hud.Reiniciar();
@@ -72,6 +73,10 @@ public class Temporizador : MonoBehaviour
                 if (panelFinPartida.panelVictoria != null) panelFinPartida.panelVictoria.SetActive(false);
             }
             if (imagenFinalController != null) imagenFinalController.Detener();
+
+            // Asegurar que el panel de pausa no quede visible al iniciar.
+            var panelPausa = GameObject.Find("PanelPausa");
+            if (panelPausa != null) panelPausa.SetActive(false);
         }
     }
 
