@@ -67,6 +67,7 @@ public class PersistenciaJugador : MonoBehaviour
 
         if (Instance != null)
         {
+            Instance.EnTransicion = false;
             if (Instance.jugadorPersistente != null) Destroy(Instance.jugadorPersistente);
             Instance.jugadorPersistente = null;
             Instance.filaViajera.Clear();

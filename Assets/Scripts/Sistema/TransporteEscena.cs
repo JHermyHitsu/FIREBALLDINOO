@@ -142,6 +142,14 @@ public class TransporteEscena : MonoBehaviour
         }
 
         // 5. Colocar jugador + fila mirando a la derecha (se sigue corriendo).
+        if (jugadorPersistente == null)
+        {
+            Debug.LogError("[Transicion] jugador destruido durante la carga.");
+            yield return StartCoroutine(Fundir(1f, 0f));
+            if (mov != null) mov.enabled = true;
+            transicionManager.EnTransicion = false;
+            yield break;
+        }
         jugadorPersistente.transform.position = spawn.transform.position;
         if (rb != null) rb.linearVelocity = Vector2.zero;
         if (sr != null) sr.flipX = false;

@@ -87,7 +87,10 @@ public class TransicionManager : MonoBehaviour
         // Elimina duplicados de escena (p. ej. el EventSystem fresco de Bosque al volver).
         foreach (var s in sistemas)
             if (s != null && s != nuestro)
+            {
+                s.gameObject.SetActive(false);
                 Destroy(s.gameObject);
+            }
     }
 
     EventSystem CrearEventSystem()
