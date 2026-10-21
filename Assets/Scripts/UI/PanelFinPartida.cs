@@ -190,12 +190,16 @@ public class PanelFinPartida : MonoBehaviour
         terminado = true;
 
         var mov = FindFirstObjectByType<Movimiento>();
-        if (mov != null) mov.enabled = false;
+        if (mov != null)
+        {
+            mov.enabled = false;
+            mov.ResetearBoost();
+        }
 
-        // Apagar HUD y pausar reloj (componentes hermanos del mismo GameManager).
-        var hud = GetComponent<HUD>();
+        // Apagar HUD y pausar reloj (componentes hermanos o en escena).
+        var hud = GetComponent<HUD>() ?? FindFirstObjectByType<HUD>();
         if (hud != null) hud.Apagar();
-        var reloj = GetComponent<Reloj>();
+        var reloj = GetComponent<Reloj>() ?? FindFirstObjectByType<Reloj>();
         if (reloj != null) { reloj.Apagar(); reloj.Pausar(); }
 
         var camGO = FindFirstObjectByType<Camara>();

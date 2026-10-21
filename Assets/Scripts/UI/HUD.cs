@@ -25,6 +25,7 @@ public class HUD : MonoBehaviour
     // Estado interno de las animaciones
     int ultimoCountAmigos = 0;
     float progresoPopAmigos = 1f;
+    bool apagado = false;
 
     void Awake()
     {
@@ -33,6 +34,8 @@ public class HUD : MonoBehaviour
 
     void Update()
     {
+        if (apagado) return;
+
         ActualizarContadorAmigos();
         ActualizarBarraBoost();
         ActualizarSegmentosBoost();
@@ -247,6 +250,7 @@ public class HUD : MonoBehaviour
     // Lo llaman MostrarGameOver y MostrarVictoria para apagar el HUD.
     public void Apagar()
     {
+        apagado = true;
         if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(false);
         if (barraBoost != null) barraBoost.gameObject.SetActive(false);
         ApagarSegmentos();
@@ -256,6 +260,7 @@ public class HUD : MonoBehaviour
     // Los segmentos quedan apagados: se encienden con el boost.
     public void Encender()
     {
+        apagado = false;
         if (textoContadorAmigos != null) textoContadorAmigos.gameObject.SetActive(true);
         if (barraBoost != null) barraBoost.gameObject.SetActive(true);
     }
@@ -263,6 +268,7 @@ public class HUD : MonoBehaviour
     // Lo llama Reintentar para dejar las animaciones en su estado inicial.
     public void Reiniciar()
     {
+        apagado = false;
         ultimoCountAmigos = 0;
         progresoPopAmigos = 1f;
         ApagarSegmentos();

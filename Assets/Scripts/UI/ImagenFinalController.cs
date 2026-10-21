@@ -38,7 +38,14 @@ public class ImagenFinalController : MonoBehaviour
         mostrando = true;
 
         var mov = FindFirstObjectByType<Movimiento>();
-        if (mov != null) mov.enabled = false;
+        if (mov != null)
+        {
+            mov.enabled = false;
+            mov.ResetearBoost();
+        }
+
+        var hud = FindFirstObjectByType<HUD>();
+        if (hud != null) hud.Apagar();
 
         var img = ResolverImagenFinal();
         if (img != null)

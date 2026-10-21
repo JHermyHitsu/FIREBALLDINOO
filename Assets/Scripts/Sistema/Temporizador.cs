@@ -118,6 +118,10 @@ public class Temporizador : MonoBehaviour
         {
             reloj.Pausar();
             reloj.Apagar();
+            if (hud != null) hud.Apagar();
+            var mov = FindFirstObjectByType<Movimiento>();
+            if (mov != null) mov.ResetearBoost();
+
             if (imagenFinalController != null)
                 imagenFinalController.Iniciar(() => MostrarGameOver());
             else
