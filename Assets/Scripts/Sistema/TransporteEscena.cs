@@ -73,7 +73,7 @@ public class TransporteEscena : MonoBehaviour
             jugadorPersistente = GameObject.FindGameObjectWithTag("Player");
         if (jugadorPersistente == null)
         {
-            Debug.LogError("[Transicion] no hay Player en escena.");
+            Debug.LogWarning("[Transicion] no hay Player en escena, abortando.");
             transicionManager.EnTransicion = false;
             yield break;
         }
@@ -144,7 +144,7 @@ public class TransporteEscena : MonoBehaviour
         // 5. Colocar jugador + fila mirando a la derecha (se sigue corriendo).
         if (jugadorPersistente == null)
         {
-            Debug.LogError("[Transicion] jugador destruido durante la carga.");
+            Debug.LogWarning("[Transicion] jugador destruido durante la carga, abortando.");
             yield return StartCoroutine(Fundir(1f, 0f));
             if (mov != null) mov.enabled = true;
             transicionManager.EnTransicion = false;

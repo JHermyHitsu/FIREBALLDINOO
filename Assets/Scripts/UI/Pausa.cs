@@ -16,8 +16,11 @@ public class Pausa : MonoBehaviour
     void Update()
     {
         // ESC alterna pausa/reanudar. Usamos GetKeyDown para que no se repita.
+        // Pero si la partida ya terminó (panel GameOver/Perder/Victoria activo), no pausar.
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+            var pfp = PanelFinPartida.Instance;
+            if (pfp != null && pfp.terminado) return;
             if (pausado) Continuar();
             else Pausar();
         }
@@ -26,11 +29,15 @@ public class Pausa : MonoBehaviour
     // Abre la pausa (llamado desde el boton de menu del HUD).
     public void AbrirMenu()
     {
+        var pfp = PanelFinPartida.Instance;
+        if (pfp != null && pfp.terminado) return;
         if (!pausado) Pausar();
     }
 
     public void Pausar()
     {
+        var pfp = PanelFinPartida.Instance;
+        if (pfp != null && pfp.terminado) return;
         pausado = true;
         EstaPausado = true;
         if (panelPausa != null) panelPausa.SetActive(true);
