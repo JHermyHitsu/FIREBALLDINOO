@@ -58,6 +58,23 @@ public class PersistenciaJugador : MonoBehaviour
         return go.AddComponent<PersistenciaJugador>();
     }
 
+    // Salida limpia al menu: detiene todos los audios y destruye el jugador persistente.
+    public static void SalirAlMenu()
+    {
+        Time.timeScale = 1f;
+        foreach (var a in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
+            if (a != null && a.isPlaying) a.Stop();
+
+        if (Instance != null)
+        {
+            if (Instance.jugadorPersistente != null) Destroy(Instance.jugadorPersistente);
+            Instance.jugadorPersistente = null;
+            Instance.filaViajera.Clear();
+        }
+
+        SceneManager.LoadScene(Escenas.MenuInicio);
+    }
+
     // Evita jugadores duplicados:
     // - En transicion: gana el jugador viajero, se destruye el que traiga la escena nueva.
     // - Sin transicion (muerte y reinicio): se adopta el jugador fresco de la escena

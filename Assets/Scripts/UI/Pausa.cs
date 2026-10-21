@@ -42,8 +42,7 @@ public class Pausa : MonoBehaviour
 
     public void Salir()
     {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(Escenas.MenuInicio);
+        PersistenciaJugador.SalirAlMenu();
     }
 
     // Asegura que al destruirse (cambio de escena) el timeScale quede en 1.
