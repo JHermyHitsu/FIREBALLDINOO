@@ -311,10 +311,16 @@ public class PanelFinPartida : MonoBehaviour
         AudioSource[] fuentes = FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
         foreach (var a in fuentes)
         {
-            if (a != null && a != audioSource && a.loop && a.isPlaying)
+            if (a != null && a != audioSource && a.isPlaying)
             {
                 a.Stop();
             }
+        }
+
+        // Desactivar items de comida que queden en escena para que no se superpongan al panel.
+        foreach (var item in FindObjectsByType<ItemComida>(FindObjectsSortMode.None))
+        {
+            if (item != null) item.gameObject.SetActive(false);
         }
     }
 
