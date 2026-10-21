@@ -50,6 +50,7 @@ public class Movimiento : MonoBehaviour
     void Update()
     {
         if (!Vivo) return;
+        if (Time.timeScale == 0f || Pausa.EstaPausado) return; // pausa: no procesar input
 
         if (estadoJugador != null) estadoJugador.Tick(Time.deltaTime);
 
