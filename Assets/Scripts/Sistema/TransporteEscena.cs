@@ -131,8 +131,10 @@ public class TransporteEscena : MonoBehaviour
         while (op.progress < 0.9f)
             yield return null;
         op.allowSceneActivation = true;
-        yield return new WaitForEndOfFrame();
-        yield return null; // Extra frame so Unity finishes initializing all scene objects.
+        // Wait until the destination scene is truly active before searching for spawns.
+        while (SceneManager.GetActiveScene().name != escenaDestino)
+            yield return null;
+        yield return null; // One extra frame for scene objects to fully initialize.
 
         if (transicionManager != null) transicionManager.AsegurarEventSystem();
 
