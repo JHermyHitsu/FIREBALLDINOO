@@ -131,13 +131,20 @@ public class TransporteEscena : MonoBehaviour
         while (op.progress < 0.9f)
             yield return null;
         op.allowSceneActivation = true;
-        yield return null;
+        yield return new WaitForEndOfFrame();
+        yield return null; // Extra frame so Unity finishes initializing all scene objects.
 
         if (transicionManager != null) transicionManager.AsegurarEventSystem();
 
         // 4. Buscar el spawn. Si no existe, abortar con fade de emergencia
         //    (nunca teleportar al 0,0,0).
-        GameObject spawn = GameObject.Find(spawnDestino);
+        GameObject spawn = null;
+        foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects())
+        {
+            if (root.name == spawnDestino) { spawn = root; break; }
+            var t = root.transform.Find(spawnDestino);
+            if (t != null) { spawn = t.gameObject; break; }
+        }
         if (spawn == null)
         {
             Debug.LogError("[Transicion] no existe el spawn '" + spawnDestino + "' en " + escenaDestino + ".");
